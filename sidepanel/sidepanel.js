@@ -48,9 +48,9 @@ const lastActive = new Map(); // space key -> last active tab id
 const ui = (() => {
   try {
     const o = JSON.parse(localStorage.getItem('ui') || '{}');
-    return { collapsed: new Set(o.collapsed || []), settingsOpen: false };
+    return { collapsed: new Set(o.collapsed || []), view: 'spaces' };
   } catch {
-    return { collapsed: new Set(), settingsOpen: false };
+    return { collapsed: new Set(), view: 'spaces' };
   }
 })();
 function saveUi() {
@@ -109,10 +109,9 @@ async function load() {
   for (const f of favs) { const t = favTabs.get(f.id); if (t) pairs.push(...FI.iconPairsForTab(t, f.url)); }
   FI.rememberIcons(pairs).catch(() => {});
 
-  // Pages you can swipe between: every space, then the Archive.
+  // Pages you can swipe between: every space. (The Archive and Settings are views, opened from the bar.)
   const pages = [
     ...(spaces.length ? spaces : [{ key: '', empty: true, title: '', color: 'grey', root: { theme: 'slate' } }]),
-    { key: ARCH, archive: true, title: 'Archive', color: 'grey', root: { theme: 'slate' } },
   ];
 
   return { tree, links: live, linked, tabs, tabsById, groups, cfg, archive, spaces, spaceMap, pages, favs, favTabs, extraPinned, icons };
@@ -174,23 +173,54 @@ async function render() {
   const next = await load();
   if (editing || dragSrc || scrolling) { scheduleRender(); return; }
   state = next;
-  if (!state.spaceMap.has(current) && current !== ARCH) {
+  if (!state.spaceMap.has(current)) {
     current = await pickInitialSpace();
     if (current) saveActiveSpace(current);
   }
 
-  $('#settings').hidden = !ui.settingsOpen;
   renderSettings();
 
   const on = state.cfg.groupPins.enabled;
-  for (const id of ['#favorites', '#pages']) $(id).hidden = !on;
-  $('#off').hidden = on;
+  if (!on && ui.view === 'archive') ui.view = 'spaces';
+  applyView({ paint: false });
+  $('#off').hidden = on || ui.view !== 'spaces';
+  if (on) {
+    renderFavorites();
+    renderPages();
+    if (ui.view === 'archive') $('#archive-view').innerHTML = archivePageHtml();
+  }
+  if (!on && ui.view === 'spaces') { $('#favorites').hidden = true; $('#pages').hidden = true; }
   renderBar();
-  if (!on) return;
+  paintView();
+}
 
-  renderFavorites();
-  renderPages();
-  renderBar();
+// ---------------------------------------------------------------- views: spaces | archive | settings
+function applyView() {
+  const v = ui.view;
+  $('#favorites').hidden = v !== 'spaces';
+  $('#pages').hidden = v !== 'spaces';
+  $('#settings').hidden = v !== 'settings';
+  $('#archive-view').hidden = v !== 'archive';
+}
+
+function paintView() {
+  if (ui.view === 'spaces') return paintAt(Math.max(0, spaceIndex(current)));
+  const [c1, c2] = darkMq.matches ? THEMES.slate.dark : THEMES.slate.light;
+  setGradient(c1, c2);
+}
+
+function setView(v) {
+  if (ui.view === v) return;
+  ui.view = v;
+  closeMenu();
+  if (v === 'archive' && state) $('#archive-view').innerHTML = archivePageHtml();
+  applyView();
+  if (v === 'spaces' && state) {
+    // the pager was hidden; put it back on the current space without animating
+    const idx = Math.max(0, spaceIndex(current));
+    pagesEl.scrollTo({ left: idx * pagesEl.clientWidth, behavior: 'instant' });
+  }
+  if (state) { renderBar(); paintView(); }
 }
 
 function renderFavorites() {
@@ -210,7 +240,7 @@ function renderPages() {
   const tops = {};
   pages.querySelectorAll('.page').forEach((p) => { tops[p.dataset.space] = p.scrollTop; });
 
-  pages.innerHTML = state.pages.map((p) => (p.archive ? archivePageHtml() : p.empty ? emptyPageHtml() : pageHtml(p))).join('');
+  pages.innerHTML = state.pages.map((p) => (p.empty ? emptyPageHtml() : pageHtml(p))).join('');
   pages.querySelectorAll('.page').forEach((p) => { if (tops[p.dataset.space]) p.scrollTop = tops[p.dataset.space]; });
 
   const idx = Math.max(0, spaceIndex(current));
@@ -313,29 +343,20 @@ function tabHtml(t, depth) {
 function renderBar() {
   const on = state.cfg.groupPins.enabled;
   $('#bar').innerHTML = `
-    <button class="bar-btn${current === ARCH ? ' on' : ''}" data-act="goto" data-space="${ARCH}" data-drop="archive" title="Archive">${ARCHIVE}</button>
-    <button class="bar-btn${ui.settingsOpen ? ' on' : ''}" data-act="gear" title="Settings">${GEAR}</button>
+    <button class="bar-btn${ui.view === 'archive' ? ' on' : ''}" data-act="view-archive" data-drop="archive" title="Archive"${on ? '' : ' hidden'}>${ARCHIVE}</button>
+    <button class="bar-btn${ui.view === 'settings' ? ' on' : ''}" data-act="gear" title="Settings">${GEAR}</button>
     <div class="bar-spaces">${(on ? state.spaces : []).map((s) =>
-      `<button class="bar-space${s.key === current ? ' on' : ''}" data-act="goto" data-space="${esc(s.key)}" data-drop="bar" title="${esc(s.title || 'Unnamed group')}">${iconHtml(s)}</button>`
+      `<button class="bar-space${ui.view === 'spaces' && s.key === current ? ' on' : ''}" data-act="goto" data-space="${esc(s.key)}" data-drop="bar" title="${esc(s.title || 'Unnamed group')}">${iconHtml(s)}</button>`
     ).join('')}</div>
     <button class="bar-btn" data-act="new-space" title="New space"${on ? '' : ' hidden'}>＋</button>`;
 }
 
 function markBar() {
-  document.querySelectorAll('#bar [data-act="goto"]').forEach((b) => b.classList.toggle('on', b.dataset.space === current));
+  document.querySelectorAll('#bar [data-act="goto"]').forEach((b) => b.classList.toggle('on', ui.view === 'spaces' && b.dataset.space === current));
 }
 
-function openSettings() {
-  ui.settingsOpen = true;
-  $('#settings').hidden = false;
-  renderBar();
-}
-function closeSettings() {
-  if (!ui.settingsOpen) return;
-  ui.settingsOpen = false;
-  $('#settings').hidden = true;
-  if (state) renderBar();
-}
+const openSettings = () => setView('settings');
+const closeSettings = () => { if (ui.view === 'settings') setView('spaces'); };
 
 // ---------------------------------------------------------------- the Archive page
 function inDays(ms) {
@@ -375,8 +396,8 @@ function archivePageHtml() {
   const put = T.childrenOf(state.tree, ARCH);
   const closed = state.archive;
   const after = String(state.cfg.autoClear.archiveAfter ?? '720');
-  return `<section class="page archive-page" data-space="${ARCH}">
-    <div class="row page-head" data-kind="archive-head"><span class="sicon">🗄</span><span class="title">Archive</span></div>
+  return `<div class="archive-page">
+    <div class="view-head"><span class="sicon">🗄</span><span class="title">Archive</span></div>
     <div class="arch-settings">
       <span class="muted">Empty after</span>
       <span class="seg">${ARCHIVE_OPTS.map(([v, l]) => `<button data-act="arch-after" data-v="${v}" class="${after === v ? 'on' : ''}">${l}</button>`).join('')}</span>
@@ -425,7 +446,7 @@ function setGradient(c1, c2) {
   document.body.style.setProperty('--g1', c1);
   document.body.style.setProperty('--g2', c2);
 }
-darkMq.addEventListener('change', () => paintAt(Math.max(0, spaceIndex(current))));
+darkMq.addEventListener('change', () => paintView());
 
 // ---------------------------------------------------------------- switching spaces
 const pagesEl = $('#pages');
@@ -503,6 +524,7 @@ chrome.tabs.onActivated.addListener(async ({ tabId, windowId: w }) => {
 
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg?.type !== 'space-step' || msg.windowId !== windowId || !state?.pages.length) return;
+  setView('spaces');
   const n = state.pages.length;
   const idx = (Math.max(0, spaceIndex(current)) + msg.dir + n) % n;
   goToSpace(state.pages[idx].key, 'user');
@@ -668,7 +690,7 @@ function agentSnapshot() {
     app: 'Snark',
     version: chrome.runtime.getManifest().version,
     note: 'Written by Snark. Read-only: send changes as command files in inbox/ (see AGENTS.md).',
-    currentSpace: current === ARCH ? 'Archive' : state.spaceMap.get(current)?.title ?? null,
+    currentSpace: state.spaceMap.get(current)?.title ?? null,
     spaces: state.spaces.map((s) => ({
       id: s.root?.id ?? null,
       title: s.title,
@@ -1098,7 +1120,6 @@ function showMenu(items, x, y) {
 document.addEventListener('click', async (e) => {
   if (!e.target.closest('#menu')) closeMenu();
   const act0 = e.target.closest('[data-act]')?.dataset.act;
-  if (ui.settingsOpen && !e.target.closest('#settings') && act0 !== 'gear') closeSettings();
   if (e.target.closest('#settings-body')) return;
   const actEl = e.target.closest('[data-act]');
   const row = e.target.closest('[data-kind]');
@@ -1107,7 +1128,8 @@ document.addEventListener('click', async (e) => {
   if (actEl) {
     e.stopPropagation();
     switch (actEl.dataset.act) {
-      case 'gear': ui.settingsOpen ? closeSettings() : openSettings(); return;
+      case 'gear': setView(ui.view === 'settings' ? 'spaces' : 'settings'); return;
+      case 'view-archive': setView(ui.view === 'archive' ? 'spaces' : 'archive'); return;
       case 'shortcuts': chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }); return;
       case 'export': await doExport(); return;
       case 'agent-choose': await agentChoose(); return;
@@ -1129,7 +1151,13 @@ document.addEventListener('click', async (e) => {
       case 'menu': { const r = actEl.getBoundingClientRect(); showMenu(menuFor(row), r.left, r.bottom + 2); return; }
       case 'close-pin': await T.closePin(row.dataset.id); return;
       case 'close-tab': await chrome.tabs.remove(+row.dataset.id); return;
-      case 'goto': goToSpace(actEl.dataset.space, 'user'); return;
+      case 'goto': {
+        const wasElsewhere = ui.view !== 'spaces';
+        setView('spaces');
+        if (wasElsewhere && actEl.dataset.space === current) enterSpace(current);
+        else goToSpace(actEl.dataset.space, 'user');
+        return;
+      }
       case 'arch-restore': await restoreArchived(row.dataset.id); return;
       case 'arch-after': await setFeature('autoClear', { archiveAfter: actEl.dataset.v }); return;
       case 'arch-clear': {
@@ -1214,7 +1242,7 @@ document.addEventListener('error', (e) => {
 }, true);
 
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') { closeMenu(); closeSettings(); }
+  if (e.key === 'Escape') { if ($('#menu')) closeMenu(); else if (!editing) setView('spaces'); }
 });
 window.addEventListener('blur', closeMenu);
 
@@ -1349,7 +1377,9 @@ function hoverSwitch(key) {
   if (key === hoverKey) return;
   clearTimeout(hoverTimer);
   hoverKey = key;
-  if (key && key !== current) hoverTimer = setTimeout(() => goToSpace(key, 'drag'), 550);
+  if (!key) return;
+  if (key === ARCH) { if (ui.view !== 'archive') hoverTimer = setTimeout(() => setView('archive'), 550); return; }
+  if (key !== current || ui.view !== 'spaces') hoverTimer = setTimeout(() => { setView('spaces'); goToSpace(key, 'drag'); }, 550);
 }
 
 document.addEventListener('dragstart', (e) => {
@@ -1419,8 +1449,18 @@ window.addEventListener('resize', () => {
 });
 
 $('#version').textContent = `v${chrome.runtime.getManifest().version}`;
+
+// Tell the background this window's sidebar is open, so ⌘B / Ctrl+B can close it.
+function connectPanel() {
+  const port = chrome.runtime.connect({ name: 'snark-panel' });
+  port.postMessage({ type: 'hello', windowId });
+  const ping = setInterval(() => { try { port.postMessage({ type: 'ping' }); } catch {} }, 20000);
+  port.onMessage.addListener((msg) => { if (msg?.type === 'close') window.close(); });
+  port.onDisconnect.addListener(() => { clearInterval(ping); setTimeout(connectPanel, 200); }); // worker restarted
+}
 chrome.windows.getCurrent().then(async (w) => {
   windowId = w.id;
+  connectPanel();
   await F.seedFavorites();
   await render();
   agent = await AF.getAgentDir().catch(() => ({ status: 'none' }));

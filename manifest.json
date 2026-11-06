@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Snark",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "minimum_chrome_version": "121",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1qGK2/VMjInxstI+gVU6eRMBeTxOE0Nc8kX1IdFogddxzVnIiQEdsm7UL5BlTN8teMamza/IhflLnYKrzsQ/mpx9+Hp7LyiqY8qjxAammZTbsPnOhKU1M9STaQ5TiuXmeq7OumuhaeqS+LkZen6UisDVRADk7wlEMSywGy/Y3gWE/x3XhJ3z1RIfvYtH35cELYo1OpNZ+eYqc9SyLj9psEt0ho7W3zE2BF5UMewxfgdZPq7+YqTjjQgC24MfFj2lGQ07gCN1DfCitEzs9B0HjK5y+BefLaJeIc/l5byc8JgJJ1vnOSF1wB8s0nalolEVdqhz1NO8/HWVCW50zZEf3QIDAQAB",
   "description": "Spaces, pinned tabs and nested folders in your side panel. Swipe between workspaces; stale tabs tidy themselves away.",
@@ -38,8 +38,9 @@
     "copy-url-markdown": {
       "description": "Copy current tab as a Markdown link"
     },
-    "_execute_action": {
-      "description": "Open the Snark sidebar"
+    "toggle-sidebar": {
+      "suggested_key": { "default": "Ctrl+B", "mac": "Command+B" },
+      "description": "Open or close the Snark sidebar"
     },
     "pin-tab": {
       "description": "Pin current tab into its space"

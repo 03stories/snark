@@ -14,7 +14,7 @@ Private by design: no account, no analytics, no servers. See [PRIVACY.md](PRIVAC
 3. Click the toolbar icon to open the sidebar. Pin the icon in the toolbar so it's always there.
 4. After you edit any file, click the reload icon on the extension's card. Close and reopen the sidebar to pick up changes to the sidebar itself.
 
-Settings open from the **⚙** in the sidebar's bottom bar.
+**⌘B** (Ctrl+B on Windows/Linux) opens and closes the sidebar. Settings and the Archive open from the bottom bar (⚙ and 🗄) as their own screens; click a space icon or press Esc to go back.
 
 **Moving the folder:** the manifest's `key` gives Snark a fixed ID (`ehphddjhccoiekiolhdhjcngcilbhijl`). But **removing an extension in Chrome deletes its data**, so before moving or re-adding the folder, export a backup: **⚙ → Backup → Export**. Then click **Load unpacked** and choose the new folder; with the same ID, Chrome should update the existing install. If Chrome adds a second copy instead, remove the old one, then use **Import** and choose your agent folder again. Export and Import are also how you move to another computer or Chrome profile.
 
@@ -34,7 +34,7 @@ Settings open from the **⚙** in the sidebar's bottom bar.
  NOT IN A SPACE · 1
    Hacker News                 ← ungrouped tabs (any page)
 └─────────────────────────┘
-  🗄 ⚙   💼  🏠  📚    ＋        ← Archive page · settings · space icons · new space
+  🗄 ⚙   💼  🏠  📚    ＋        ← Archive · Settings · space icons · new space
 ```
 
 ### Favorites
@@ -100,13 +100,13 @@ Settings open from the **⚙** in the sidebar's bottom bar.
 - Closed tabs go to the Archive page's **Closed tabs** list.
 
 ### Archive
-- **One global Archive**, shown as the last page. Swipe past your last space, or click 🗄 in the bottom bar.
+- **One global Archive**: click 🗄 in the bottom bar to open it (click again, press Esc or pick a space to go back).
 - **Archiving:** right-click a pin or folder → **Archive**, or drag it (or a tab) onto 🗄.
 - **The list:** items are shown newest first, with a subtle label for the space they came from. ↩︎ **Restore** puts an item back exactly where it was.
 - **Clearing:** set **Empty after** (Never / 1 day / 1 week / 1 month) at the top of the page. It applies to both put-away items and closed tabs. **Clear now** empties everything after asking.
 
 ### Opening the sidebar
-- Click the toolbar icon, or assign a key to **"Open the Snark sidebar"** at `chrome://extensions/shortcuts`.
+- Click the toolbar icon, or press **⌘B** / **Ctrl+B** ("Open or close the Snark sidebar"). You can change the key at `chrome://extensions/shortcuts`. Note that while it's set to ⌘B, websites like Gmail or Google Docs won't get ⌘B for **bold**.
 - To put the sidebar on the left, set **Side panel → Show on left** at `chrome://settings/appearance`.
 - Chrome only lets extensions open the side panel after you click or press a shortcut. Chrome normally keeps the panel open in a window once you've opened it, and brings it back when it restores your windows.
 

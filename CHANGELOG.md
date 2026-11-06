@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0
+
+- **⌘B / Ctrl+B opens and closes the sidebar.** You can change it at `chrome://extensions/shortcuts`. While it's ⌘B, web apps don't receive ⌘B (bold).
+- **Archive and Settings are their own screens**, opened from 🗄 and ⚙ in the bottom bar. Click again, press Esc, or pick a space to go back.
+  - The Archive is no longer a page you swipe to.
+  - Settings are no longer a popup.
+
 ## 1.0.0 — First public release
 
 - **Spaces** you swipe between in Chrome's side panel. Each one is a Chrome tab group with its own icon, gradient theme and color. Switching brings back your last tab and folds the other spaces' groups away.

@@ -6,7 +6,15 @@
   <link rel="stylesheet" href="sidepanel.css" />
 </head>
 <body>
-  <section id="settings" hidden>
+
+  <div id="off" class="empty muted" hidden>
+    Spaces are turned off. Turn on “Spaces &amp; pinned tabs” in ⚙ settings.
+  </div>
+
+  <div id="favorites"></div>
+  <main id="pages"></main>
+  <section id="settings" class="view" hidden>
+    <div class="view-head"><span class="sicon">⚙︎</span><span class="title">Settings</span></div>
     <div id="settings-body"></div>
     <div class="agent">
       <strong>Agent folder</strong>
@@ -36,13 +44,7 @@
       <span class="muted" id="version"></span>
     </div>
   </section>
-
-  <div id="off" class="empty muted" hidden>
-    Spaces are turned off. Turn on “Spaces &amp; pinned tabs” in ⚙ settings.
-  </div>
-
-  <div id="favorites"></div>
-  <main id="pages"></main>
+  <section id="archive-view" class="view" hidden></section>
   <div id="notice" hidden></div>
   <nav id="bar"></nav>
 

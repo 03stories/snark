@@ -30,11 +30,14 @@ body {
 button:hover { background: var(--hover); }
 
 
-/* ---------- settings popup (opens from the ⚙ in the bottom bar) ---------- */
-#settings {
-  position: fixed; left: 8px; right: 8px; bottom: 48px; z-index: 6; max-height: 75vh; overflow: auto;
-  padding: 8px; background: var(--sheet); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.18);
+/* ---------- full-panel views: Settings and Archive (opened from the bottom bar) ---------- */
+.view { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 10px 24px; }
+.view-head { display: flex; align-items: center; gap: 8px; padding: 8px 4px 10px; font-weight: 600; font-size: 14px; opacity: .85; }
+.view-head .title { flex: 1; }
+#settings .feature, #settings .agent, #settings .backup {
+  background: var(--sheet); border: 0; border-radius: 12px; padding: 10px 12px; margin-bottom: 8px;
 }
+#settings .settings-foot { padding: 6px 4px; }
 .feature { padding: 8px 4px; border-bottom: 1px solid var(--line); }
 .feature:last-child { border-bottom: 0; }
 .feature .head { display: flex; align-items: center; gap: 8px; }
