@@ -23,7 +23,7 @@ Snark turns Chrome's side panel into a calm home for your tabs:
 • **Auto-clear and Archive.** Tabs you haven't touched in a day close on their own, and archived pins and folders empty after a timer you choose. Everything goes to the Archive first, so you can restore it.
 • **Copy URL** with ⌘⇧C (Ctrl+Shift+C), with a little toast. Optionally strips tracking parameters.
 • **Backup** to a JSON file, and restore it on any computer.
-• **For power users: an agent folder.** Point Snark at a local folder and an AI agent (or a script) can read your spaces and add or organize pins through plain JSON files, with every change undoable.
+• **For power users: an agent folder.** Point Snark at a local folder and an AI agent (or a script) can read your spaces and add or organize pins through plain JSON files, with every change undoable. It keeps working while the sidebar is closed.
 
 Private by design: no account, no analytics, no servers. Everything is stored in your browser, or in a folder you choose.
 
@@ -41,9 +41,18 @@ Organize and switch between tabs in Chrome's side panel: spaces (tab groups), pi
 | `alarms` | Run auto-clear and Archive cleanup periodically. |
 | `favicon` | Show site icons next to pins and favorites. |
 | `scripting`, `activeTab` | Show a small "Copied URL" toast on the page you're on, only after you press the shortcut. |
-| `offscreen`, `clipboardWrite` | Write the copied URL to your clipboard. |
+| `offscreen`, `clipboardWrite` | Write the copied URL to your clipboard. **Only if the user connects a local agent folder**, the same offscreen document stays open to keep that folder (a File System Access handle) available, so it can write `state.json` and read command files while the sidebar is closed. Without an agent folder it's only opened briefly for clipboard writes. See the reviewer note below. |
 
 No host permissions. No remote code.
+
+## Note for reviewers: the offscreen document (put in "Notes for reviewer" / justification)
+Snark creates one offscreen document with reasons `CLIPBOARD` and `BLOBS`.
+- **For everyone:** it writes the copied tab URL to the clipboard (Copy URL shortcut).
+- **Only if the user explicitly connects a local "agent folder"** (Settings → Agent folder → Choose folder): it stays open to hold that folder. The folder is a File System Access directory handle the user picked. The document writes `state.json` / `activity.log` and reads JSON command files from `inbox/`, then passes them to the service worker to apply.
+  - Chrome drops File System Access permission when an extension's last page closes. Keeping this document open is what lets the user grant access once per browser session, instead of every time they open the side panel.
+- No remote code, no network access, and no other APIs are used. It closes again when the user disconnects the folder.
+
+There's no offscreen reason specifically for file-system access, which is why this is explained here. If the review objects, the fallback is the previous behavior (sync only while the side panel is open).
 
 ## Privacy practices (data-use form)
 - **Data handled:** "Web history" (the titles and URLs of your tabs) and "Website content" (site icons).

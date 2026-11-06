@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.0 — The agent folder keeps working with the sidebar closed
+
+- **Agent folder sync moved to the background.** A hidden offscreen page holds the folder and the background script applies commands. That page only exists while an agent folder is connected.
+  - Commands dropped into `inbox/` are applied, and `state.json` stays current, **while the sidebar is closed**, as long as Chrome is running.
+  - **Reconnect should only be needed once per Chrome restart**, not every time you open the sidebar. Chrome drops folder permission when an extension's last page closes; the hidden page keeps one open. This is experimental, so please report if it still asks.
+- AGENTS.md v7 reflects this. Unedited copies upgrade automatically.
+
 ## 1.1.0
 
 - **⌘B / Ctrl+B opens and closes the sidebar.** You can change it at `chrome://extensions/shortcuts`. While it's ⌘B, web apps don't receive ⌘B (bold).

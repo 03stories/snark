@@ -593,7 +593,7 @@ function renderAgentUi() {
   const st = $('#agent-status');
   st.classList.toggle('warn', agent.status === 'needs-permission');
   st.textContent = agent.status === 'ok'
-    ? `Connected to “${agent.name}”. Syncing while this sidebar is open.`
+    ? `Connected to “${agent.name}”. Syncing in the background while Chrome is open.`
     : agent.status === 'needs-permission'
       ? `“${agent.name}” needs permission again (Chrome asks after a restart).`
       : 'Not connected.';
@@ -628,7 +628,7 @@ async function agentChoose() {
   }
   renderAgentUi();
   hideNotice();
-  agentTick();
+  agentSyncHost();
 }
 
 let reconnecting = null;
@@ -640,7 +640,7 @@ async function agentReconnect() {
   await reconnecting;
   if (agent.status === 'ok') await AF.scaffold(agent.handle).catch((e) => console.warn('agent folder scaffold', e)); // upgrade guide/schema here too
   renderAgentUi();
-  if (agent.status === 'ok') { hideNotice(); agentTick(); }
+  if (agent.status === 'ok') { hideNotice(); agentSyncHost(); }
 }
 
 async function agentUndoClick(cmdId, force = false) {
@@ -672,79 +672,22 @@ function hideNotice() {
   $('#notice').hidden = true;
 }
 
-/** What agents see in state.json. */
-function agentSnapshot() {
-  const pinOut = (n) => {
-    const t = state.tabsById.get(state.links[n.id]);
-    return {
-      type: 'pin', id: n.id, title: n.title, url: n.url,
-      ...(n.note ? { note: n.note } : {}),
-      open: !!t,
-      ...(t && t.url && t.url !== n.url ? { currentUrl: t.url } : {}),
-    };
-  };
-  const itemsOf = (pid) => T.childrenOf(state.tree, pid).map((n) =>
-    n.type === 'pin' ? pinOut(n) : { type: 'folder', id: n.id, title: n.title, items: itemsOf(n.id) });
-  const tabOut = (t) => ({ title: t.title, url: t.url });
-  return {
-    app: 'Snark',
-    version: chrome.runtime.getManifest().version,
-    note: 'Written by Snark. Read-only: send changes as command files in inbox/ (see AGENTS.md).',
-    currentSpace: state.spaceMap.get(current)?.title ?? null,
-    spaces: state.spaces.map((s) => ({
-      id: s.root?.id ?? null,
-      title: s.title,
-      icon: s.root?.icon ?? null,
-      theme: themeKeyFor(s),
-      color: s.color,
-      hasTabGroup: !!s.group,
-      items: s.root ? itemsOf(s.root.id) : [],
-      today: spaceTabs(s).map(tabOut),
-    })),
-    notInSpace: looseTabs().map(tabOut),
-    archive: {
-      emptyAfterHours: Number(state.cfg.autoClear.archiveAfter ?? 0) || null,
-      items: T.childrenOf(state.tree, ARCH).map((n) => ({
-        ...(n.type === 'pin' ? pinOut(n) : { type: 'folder', id: n.id, title: n.title, items: itemsOf(n.id) }),
-        archivedAt: n.archivedAt ? new Date(n.archivedAt).toISOString() : null,
-        fromSpace: n.from?.spaceTitle ?? null,
-      })),
-      closedTabs: state.archive.slice(0, 50).map((c) => ({ title: c.title, url: c.url, closedAt: new Date(c.closedAt).toISOString() })),
-    },
-    favorites: state.favs.map((f) => ({ id: f.id, title: f.title, url: f.url })),
-  };
+// The agent folder is synced in the background (offscreen/offscreen.js + features/agent-host.js),
+// so it keeps working with the sidebar closed. The sidebar only connects/reconnects it and shows
+// a notice (with Undo) when a command is applied.
+const AGENT_FLAG = 'agentFolder';
+async function agentSyncHost() {
+  if (agent.status === 'none') await chrome.storage.local.remove(AGENT_FLAG);
+  else await chrome.storage.local.set({ [AGENT_FLAG]: { name: agent.name } });
+  await chrome.runtime.sendMessage({ target: 'sw', type: 'agent-refresh' }).catch(() => {});
 }
 
-let agentBusy = false;
-async function agentTick() {
-  if (agent.status !== 'ok' || !state || agentBusy) return;
-  agentBusy = true;
-  try {
-    // One sidebar at a time does the syncing, even with several windows open.
-    await navigator.locks.request('myarc-agent-folder', { ifAvailable: true }, async (lock) => {
-      if (!lock) return;
-      const results = await AF.processInbox(agent.handle, { windowId, groups: state.groups }, (r) => {
-        if (r.status === 'ok') {
-          showNotice(`<b>Agent:</b> ${esc(r.summary)}`, { action: r.undoId ? { act: 'agent-undo', cmd: r.undoId, label: 'Undo' } : null });
-        } else {
-          showNotice(`<b>Agent command failed:</b> ${esc(r.error)}`, { error: true });
-        }
-      });
-      if (results.length) state = await load(); // reflect changes in state.json right away
-      await AF.writeState(agent.handle, agentSnapshot());
-    });
-  } catch (e) {
-    console.warn('agent folder sync failed', e);
-    if (e?.name === 'NotAllowedError' || e?.name === 'NotFoundError' || e?.name === 'SecurityError') {
-      agent = await AF.getAgentDir();
-      if (agent.status === 'ok') agent = { ...agent, status: 'needs-permission' };
-      renderAgentUi();
-    }
-  } finally {
-    agentBusy = false;
-  }
-}
-setInterval(agentTick, 2000);
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg?.type !== 'agent-applied' || !msg.result) return;
+  const r = msg.result;
+  if (r.status === 'ok') showNotice(`<b>Agent:</b> ${esc(r.summary)}`, { action: r.undoId ? { act: 'agent-undo', cmd: r.undoId, label: 'Undo' } : null });
+  else showNotice(`<b>Agent command failed:</b> ${esc(r.error)}`, { error: true });
+});
 
 // ---------------------------------------------------------------- backup
 let pendingImport = null;
@@ -1134,7 +1077,7 @@ document.addEventListener('click', async (e) => {
       case 'export': await doExport(); return;
       case 'agent-choose': await agentChoose(); return;
       case 'agent-reconnect': await agentReconnect(); return;
-      case 'agent-disconnect': await AF.disconnectAgentDir(); agent = { status: 'none' }; renderAgentUi(); return;
+      case 'agent-disconnect': await AF.disconnectAgentDir(); agent = { status: 'none' }; renderAgentUi(); agentSyncHost(); return;
       case 'agent-undo': await agentUndoClick(actEl.dataset.cmd); return;
       case 'agent-undo-force': await agentUndoClick(actEl.dataset.cmd, true); return;
       case 'notice-close': hideNotice(); return;
@@ -1466,5 +1409,5 @@ chrome.windows.getCurrent().then(async (w) => {
   agent = await AF.getAgentDir().catch(() => ({ status: 'none' }));
   if (agent.status === 'ok') await AF.scaffold(agent.handle).catch((e) => console.warn('agent folder scaffold', e)); // refresh guide/schema after updates
   renderAgentUi();
-  agentTick();
+  agentSyncHost(); // also upgrades installs from before the background host existed
 });

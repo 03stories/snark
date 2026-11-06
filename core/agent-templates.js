@@ -9,16 +9,17 @@ export const AGENTS_MD_REPLACEABLE = [
   'e29652c03c39372bf080f8ed4ffb366b15ab4e09fa3daaed5e7d52d111c6d713', // v0.4.1
   '3e534a9cf4a87ad529abe873c95a571d504a1fe50688c19f9f70d5d514c3feb0', // v0.4.2
   '9045f56b214c277ce2fdf07d47330ba9b8a18ae343984e209a4ba6951a534704', // v0.5.0
-  'a0f0d0ae59b8aa56eb17172857ee6e89851910d75529d2b26647e7d66188c6de', // v0.5.1 (named Snark)
+  'a0f0d0ae59b8aa56eb17172857ee6e89851910d75529d2b26647e7d66188c6de', // v0.5.1 (as myArc)
+  '39549f3703bf1505e1df3dcaeb1c392bfa4f3df773610d4acdff4f4a45e1b8b6', // v1.1.0
 ];
 
-export const AGENTS_MD = `<!-- Snark AGENTS.md v6. Edit freely: Snark only replaces unedited copies. -->
+export const AGENTS_MD = `<!-- Snark AGENTS.md v7. Edit freely: Snark only replaces unedited copies. -->
 # Snark agent folder
 
 This folder is a two-way bridge to **Snark**, a spaces-and-pinned-tabs sidebar extension running in
 the user's Chrome. Read \`state.json\` to see their spaces, folders, pins and favorites.
 Write a command file into \`inbox/\` to change them. Snark picks it up within a few seconds
-while its sidebar is open, applies it, and moves it to \`processed/\` with the result.
+while Chrome is running (no sidebar needed), applies it, and moves it to \`processed/\` with the result.
 
 ## Files
 
@@ -58,7 +59,7 @@ Colors: ${COLORS.join(', ')}
 The user edits Snark by hand at the same time you do. To never undo their work:
 
 - **Read \`state.json\` right before writing each command**, not from memory or an earlier
-  read in the conversation. It's rewritten within ~2 seconds of any change while a sidebar is open.
+  read in the conversation. It's rewritten within ~2 seconds of any change while Chrome is running.
 - **Send changes, not copies.** Commands are applied to the user's live data at that moment.
   Only the items you name are touched; there's no "replace everything" op, on purpose.
 - **Refer to existing items by \`id\`.** Titles can change. If an id no longer exists, the
@@ -145,7 +146,8 @@ The last 20 commands can be undone.
 - Prefer canonical, stable URLs (official docs, repos, papers) over search-result or tracking links.
 - Put a sentence of context in \`note\` when it helps. The user sees it on hover.
 - After writing a command, wait a few seconds and check \`processed/<same name>.result.json\`.
-  If it's still in \`inbox/\`, the sidebar is probably closed; tell the user to open it.
+  If it's still in \`inbox/\` after ~10 seconds, Chrome is probably closed, or the folder needs
+  permission again: tell the user to open the Snark sidebar and click once (it reconnects).
 - Never write to \`state.json\` and never delete other files here.
 `;
 

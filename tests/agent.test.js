@@ -310,3 +310,15 @@ test('updateFavorite renames, re-points and reorders; update on a favorite id sa
   assert.equal(r.status, 'ok');
   assert.deepEqual(areas.local.favorites.map((f) => f.title), ['Inbox (495) - james@… - Mail', 'HEY']);
 });
+
+test('processInbox can hand commands to another context (the background host does this)', async () => {
+  const dir = new FakeDir();
+  const inbox = await dir.getDirectoryHandle('inbox', { create: true });
+  inbox.put('01.json', JSON.stringify({ summary: 'hi', ops: [{ op: 'createSpace', title: 'Elsewhere' }] }));
+  const seen = [];
+  const results = await processInbox(dir, {}, null, async (cmd) => { seen.push(cmd.summary); return { status: 'ok', summary: 'applied remotely' }; });
+  assert.deepEqual(seen, ['hi']);
+  assert.equal(results[0].summary, 'applied remotely');
+  assert.equal(tree().some((n) => n.title === 'Elsewhere'), false); // the default engine wasn't used
+  assert.match(dir.read('activity.log'), /✓ 01\.json \(hi\) — applied remotely/);
+});

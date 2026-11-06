@@ -2,8 +2,9 @@ import { getAll, onFeaturesChanged } from './core/settings.js';
 import * as copyUrl from './features/copy-url.js';
 import * as groupPins from './features/group-pins.js';
 import * as autoClear from './features/auto-clear.js';
+import * as agentHost from './features/agent-host.js';
 
-const modules = [copyUrl, groupPins, autoClear];
+const modules = [copyUrl, groupPins, autoClear, agentHost];
 
 // Toolbar button opens the sidebar directly (settings live inside it).
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(console.warn);

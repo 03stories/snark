@@ -16,6 +16,7 @@ Security tab of this repository), not a public issue. Include steps to reproduce
   - you pick the folder explicitly, and can disconnect it at any time
   - commands only accept `http(s)` links (no `javascript:`, `file:` or `data:` URLs)
   - commands are all or nothing, every change is logged in `activity.log`, and each one can be undone
-  - commands are only processed while a Snark sidebar is open
+  - commands are only processed while Chrome is running and the folder is connected. A hidden
+    offscreen page holds the folder; it exists only while an agent folder is connected.
 
   Only connect a folder that you, and programs you trust, can write to.

@@ -123,7 +123,11 @@ function stamp(d = new Date()) {
  * Apply every ready command file in inbox/ (oldest name first).
  * Files modified in the last second are left for the next pass, in case they're still being written.
  */
-export async function processInbox(root, ctx, onDone) {
+/**
+ * `apply(command, ctx)` applies one command and returns its result. It's the command engine by
+ * default; the background host passes a function that hands the command to the service worker.
+ */
+export async function processInbox(root, ctx, onDone, apply = applyCommand) {
   const inbox = await root.getDirectoryHandle('inbox', { create: true });
   const processed = await root.getDirectoryHandle('processed', { create: true });
   const ready = [];
@@ -141,7 +145,7 @@ export async function processInbox(root, ctx, onDone) {
     let result;
     try {
       command = JSON.parse(text);
-      result = await applyCommand(command, ctx);
+      result = await apply(command, ctx);
     } catch (e) {
       result = { status: 'error', error: e instanceof SyntaxError ? `Invalid JSON: ${e.message}` : String(e?.message ?? e) };
     }

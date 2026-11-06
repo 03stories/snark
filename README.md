@@ -116,10 +116,10 @@ Private by design: no account, no analytics, no servers. See [PRIVACY.md](PRIVAC
 2. Snark writes `AGENTS.md`, `state.json` and the `inbox/`, `processed/` and `skills/` folders into it.
 3. Give Claude, or any agent, access to that folder and ask it to do things like "research vector databases and make me a space".
    - It reads `state.json` and writes a command file to `inbox/`.
-   - Snark applies it within a couple of seconds while a sidebar is open, and shows a notice with **Undo**.
+   - Snark applies it within a couple of seconds while Chrome is running, even with the sidebar closed, and shows a notice with **Undo** in the sidebar.
    - The command, its result and a log line stay in the folder, so you can always see what changed.
 
-`AGENTS.md` describes the format and rules; edit it or add recipes to `skills/` to shape how agents work. If Chrome asks for permission again after a restart, click **Reconnect** in the sidebar notice.
+`AGENTS.md` describes the format and rules; edit it or add recipes to `skills/` to shape how agents work. Chrome asks for folder permission again after a restart; your first click in the sidebar reconnects it (choose **Allow on every visit** if offered). Until then, commands wait in `inbox/`. While Chrome is open, a small hidden page keeps the folder connected, so closing and reopening the sidebar doesn't ask again.
 
 ## Copy URL
 - **⌘⇧C** copies the current tab's URL and shows a toast.
