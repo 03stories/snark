@@ -16,7 +16,7 @@ Private by design: no account, no analytics, no servers. See [PRIVACY.md](PRIVAC
 
 Settings open from the **⚙** in the sidebar's bottom bar.
 
-**Moving the folder is safe.** The manifest's `key` gives Snark a fixed ID (`ehphddjhccoiekiolhdhjcngcilbhijl`), so Chrome keeps your data wherever the folder lives. To move to another computer or Chrome profile, use **⚙ → Backup → Export** there, then **Import** on the new one.
+**Moving the folder:** the manifest's `key` gives Snark a fixed ID (`ehphddjhccoiekiolhdhjcngcilbhijl`). But **removing an extension in Chrome deletes its data**, so before moving or re-adding the folder, export a backup: **⚙ → Backup → Export**. Then click **Load unpacked** and choose the new folder; with the same ID, Chrome should update the existing install. If Chrome adds a second copy instead, remove the old one, then use **Import** and choose your agent folder again. Export and Import are also how you move to another computer or Chrome profile.
 
 ## The sidebar
 
