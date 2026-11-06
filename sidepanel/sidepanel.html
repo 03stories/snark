@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="../ui/base.css" />
+  <link rel="stylesheet" href="sidepanel.css" />
+</head>
+<body>
+  <section id="settings" hidden>
+    <div id="settings-body"></div>
+    <div class="agent">
+      <strong>Agent folder</strong>
+      <p class="desc muted">Lets Claude (or any agent) read and edit Snark through files in a folder you pick, such as <code>~/Desktop/Snark-data</code>. See AGENTS.md inside it.</p>
+      <p id="agent-status" class="muted"></p>
+      <div class="backup-btns">
+        <button data-act="agent-choose">Choose folder…</button>
+        <button data-act="agent-reconnect" hidden>Reconnect</button>
+        <button data-act="agent-disconnect" hidden>Disconnect</button>
+      </div>
+    </div>
+    <div class="backup">
+      <strong>Backup</strong>
+      <p class="desc muted">Spaces, folders, pins, favorites and settings as a JSON file. Use it to move to a new folder, profile or computer.</p>
+      <div class="backup-btns">
+        <button data-act="export">Export…</button>
+        <button data-act="import-file">Import file…</button>
+        <button data-act="import-paste">Paste…</button>
+      </div>
+      <input type="file" id="import-input" accept=".json,application/json" hidden />
+      <textarea id="import-text" placeholder="Paste a Snark backup here" hidden></textarea>
+      <div id="import-confirm" hidden></div>
+      <p id="backup-status" class="muted"></p>
+    </div>
+    <div class="settings-foot">
+      <button data-act="shortcuts">Edit keyboard shortcuts…</button>
+      <span class="muted" id="version"></span>
+    </div>
+  </section>
+
+  <div id="off" class="empty muted" hidden>
+    Spaces are turned off. Turn on “Spaces &amp; pinned tabs” in ⚙ settings.
+  </div>
+
+  <div id="favorites"></div>
+  <main id="pages"></main>
+  <div id="notice" hidden></div>
+  <nav id="bar"></nav>
+
+  <script type="module" src="sidepanel.js"></script>
+</body>
+</html>

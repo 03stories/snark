@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "Snark",
+  "version": "1.0.0",
+  "minimum_chrome_version": "121",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1qGK2/VMjInxstI+gVU6eRMBeTxOE0Nc8kX1IdFogddxzVnIiQEdsm7UL5BlTN8teMamza/IhflLnYKrzsQ/mpx9+Hp7LyiqY8qjxAammZTbsPnOhKU1M9STaQ5TiuXmeq7OumuhaeqS+LkZen6UisDVRADk7wlEMSywGy/Y3gWE/x3XhJ3z1RIfvYtH35cELYo1OpNZ+eYqc9SyLj9psEt0ho7W3zE2BF5UMewxfgdZPq7+YqTjjQgC24MfFj2lGQ07gCN1DfCitEzs9B0HjK5y+BefLaJeIc/l5byc8JgJJ1vnOSF1wB8s0nalolEVdqhz1NO8/HWVCW50zZEf3QIDAQAB",
+  "description": "Spaces, pinned tabs and nested folders in your side panel. Swipe between workspaces; stale tabs tidy themselves away.",
+  "permissions": [
+    "tabs",
+    "tabGroups",
+    "storage",
+    "offscreen",
+    "clipboardWrite",
+    "scripting",
+    "activeTab",
+    "sidePanel",
+    "contextMenus",
+    "favicon",
+    "alarms"
+  ],
+  "icons": { "16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png" },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Open Snark",
+    "default_icon": { "16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png" }
+  },
+  "side_panel": {
+    "default_path": "sidepanel/sidepanel.html"
+  },
+  "commands": {
+    "copy-url": {
+      "suggested_key": { "default": "Ctrl+Shift+C", "mac": "Command+Shift+C" },
+      "description": "Copy current tab URL"
+    },
+    "copy-url-markdown": {
+      "description": "Copy current tab as a Markdown link"
+    },
+    "_execute_action": {
+      "description": "Open the Snark sidebar"
+    },
+    "pin-tab": {
+      "description": "Pin current tab into its space"
+    },
+    "next-space": {
+      "description": "Switch to the next space"
+    },
+    "prev-space": {
+      "description": "Switch to the previous space"
+    }
+  }
+}
