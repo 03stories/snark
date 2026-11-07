@@ -18,7 +18,7 @@ Snark turns Chrome's side panel into a calm home for your tabs:
 • **Spaces you swipe between.** Each one is a Chrome tab group with its own colors, icon and gradient. Switching spaces brings back the tab you were on and folds the others away.
 • **Pinned tabs that stay put.** Browse freely inside a pinned tab. Close it, and clicking the pin brings you back to the page you pinned. Rename pins so they keep your label even when the page title changes.
 • **Nested folders.** Organize pins as deep as you like, and drag and drop everything.
-• **⌘K search.** Find any pin, folder or tab by typing a few letters. Snark opens it and shows you where it lives.
+• **Search Snark (⌘⇧K).** A search box centered over the page. Type a few letters to find any pin, folder or tab; Snark opens it and shows you where it lives.
 • **Favorites.** A row of icons for the sites you live in, shared by every space and window.
 • **Today.** Each space keeps its unpinned tabs below the line. New tabs join the space you're in.
 • **Auto-clear and Archive.** Tabs you haven't touched in a day close on their own, and archived pins and folders empty after a timer you choose. Everything goes to the Archive first, so you can restore it.
@@ -41,10 +41,12 @@ Organize and switch between tabs in Chrome's side panel: spaces (tab groups), pi
 | `contextMenus` | "Pin tab to sidebar" on the page and toolbar right-click menus. |
 | `alarms` | Run auto-clear and Archive cleanup periodically. |
 | `favicon` | Show site icons next to pins and favorites. |
-| `scripting`, `activeTab` | Show a small "Copied URL" toast on the page you're on, only after you press the shortcut. |
+| `scripting`, `activeTab` | Only after you press one of Snark's shortcuts, on the tab you're on: show a small "Copied URL" toast, or show the Search Snark box over the page (an iframe of the extension's own search page, removed when you close it). |
 | `offscreen`, `clipboardWrite` | Write the copied URL to your clipboard. **Only if the user connects a local agent folder**, the same offscreen document stays open to keep that folder (a File System Access handle) available, so it can write `state.json` and read command files while the sidebar is closed. Without an agent folder it's only opened briefly for clipboard writes. See the reviewer note below. |
 
 No host permissions. No remote code.
+
+**Web accessible resources:** `search/search.html` and the modules it loads, so the search box can be shown over the current page in an iframe. It shows nothing unless the extension opened it, using a one-time token checked by the background script, so other sites can't embed it.
 
 ## Note for reviewers: the offscreen document (put in "Notes for reviewer" / justification)
 Snark creates one offscreen document with reasons `CLIPBOARD` and `BLOBS`.

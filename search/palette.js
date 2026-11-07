@@ -1,31 +1,23 @@
-// The ⌘K palette: type to find any pin, folder, space, favorite, tab or archived item.
-// ↵ opens it and shows it in the sidebar; ⌘↵ (Ctrl+↵) only shows it. The sidebar supplies the
-// data and the actions through `provider`; this file is just the UI and the keyboard.
+// The search palette UI and keyboard: type to find any pin, folder, space, favorite, tab or
+// archived item. ↵ opens it (and shows it in the sidebar); ⌘↵ (Ctrl+↵) only shows it.
+// search.js supplies the data and the actions through `provider`.
 
 import * as S from '../core/search.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 const host = (url) => { try { return new URL(url).host.replace(/^www\./, ''); } catch { return ''; } };
-const RECENTS = 'recentPicks';
-const MAX_RECENTS = 6;
 const KIND_LABEL = { folder: 'Folder', space: 'Space', fav: 'Favorite', tab: 'Tab', closed: 'Closed tab', action: '' };
-
-function loadRecents() {
-  try { return JSON.parse(localStorage.getItem(RECENTS) || '[]'); } catch { return []; }
-}
-function saveRecent(key) {
-  try {
-    const list = [key, ...loadRecents().filter((k) => k !== key)].slice(0, MAX_RECENTS);
-    localStorage.setItem(RECENTS, JSON.stringify(list));
-  } catch {}
-}
+export const MOD = /Mac/.test(navigator.platform ?? '') ? '⌘' : 'Ctrl+';
 
 /**
  * provider: {
- *   entries(): search entries (core/search.js)
- *   currentSpace(): key of the space on screen
- *   icon(entry): HTML for the row's icon
- *   pick(entry, { reveal }): open / show it
+ *   entries():            search entries (core/search.js)
+ *   currentSpace():       key of the space on screen, ranked slightly higher
+ *   recents():            keys (S.keyOf) of recent picks, newest first
+ *   icon(entry):          HTML for the row's icon
+ *   pick(entry, { reveal }): open / show it (the palette stays hidden-but-alive until it resolves)
+ *   remember(key):        record a pick
+ *   onClose():            the palette is done
  * }
  */
 export function createPalette(root, provider) {
@@ -36,28 +28,30 @@ export function createPalette(root, provider) {
         <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         <input class="pal-input" type="text" placeholder="Jump to a pin, folder, space…" autocomplete="off" spellcheck="false"
                role="combobox" aria-expanded="true" aria-controls="pal-list" aria-autocomplete="list">
+        <span class="pal-brand">Snark</span>
       </div>
       <div class="pal-list" id="pal-list" role="listbox"></div>
-      <div class="pal-foot"><span><kbd>↵</kbd> open</span><span><kbd>${/Mac/.test(navigator.platform ?? '') ? '⌘' : 'Ctrl'}↵</kbd> show only</span><span><kbd>esc</kbd> close</span></div>
+      <div class="pal-foot"><span><kbd>↵</kbd> open</span><span><kbd>${MOD}↵</kbd> show in sidebar</span><span><kbd>↑↓</kbd> move</span><span><kbd>esc</kbd> close</span></div>
     </div>`;
   const input = root.querySelector('.pal-input');
   const list = root.querySelector('.pal-list');
   let rows = [];   // entries in display order (selectable)
   let sel = 0;
   let lastPointer = null;
+  let busy = false;
 
   function results(q) {
     const entries = provider.entries();
     if (q.trim()) return { groups: [{ hits: S.search(entries, q, { currentSpace: provider.currentSpace() }) }] };
     const byKey = new Map(entries.map((e) => [S.keyOf(e), e]));
-    const recent = loadRecents().map((k) => byKey.get(k)).filter(Boolean).map((entry) => ({ entry, marks: [] }));
+    const recent = provider.recents().map((k) => byKey.get(k)).filter(Boolean).map((entry) => ({ entry, marks: [] }));
     const spaces = entries.filter((e) => e.kind === 'space').map((entry) => ({ entry, marks: [] }));
     return { groups: [{ label: 'Recent', hits: recent }, { label: 'Spaces', hits: spaces }], empty: true };
   }
 
   function sub(e) {
-    const where = e.path?.length ? e.path.join(' › ') : '';
     if (e.kind === 'space') return e.count ? `${e.count} pin${e.count === 1 ? '' : 's'}` : '';
+    const where = e.path?.length ? e.path.join(' › ') : '';
     const h = e.url ? host(e.url) : '';
     return [where, h].filter(Boolean).join(' · ');
   }
@@ -109,12 +103,18 @@ export function createPalette(root, provider) {
     markSel();
   }
 
-  async function choose(i, reveal) {
+  // Runs synchronously up to provider.pick(), so pick() can still use this keypress/click
+  // (Chrome only opens the side panel during one).
+  function choose(i, reveal) {
     const e = rows[i];
-    if (!e) return;
-    saveRecent(S.keyOf(e));
-    close();
-    try { await provider.pick(e, { reveal }); } catch (err) { console.warn('palette pick failed', err); }
+    if (!e || busy) return;
+    busy = true;
+    provider.remember(S.keyOf(e));
+    root.classList.add('picked'); // hide right away; finish the work before going away
+    Promise.resolve()
+      .then(() => provider.pick(e, { reveal }))
+      .catch((err) => console.warn('search pick failed', err))
+      .finally(() => { busy = false; close(); });
   }
 
   input.addEventListener('input', () => { sel = 0; draw(); });
@@ -125,9 +125,9 @@ export function createPalette(root, provider) {
     else if (e.key === 'PageDown' && rows.length) { e.preventDefault(); sel = Math.min(rows.length - 1, sel + 8); markSel(); }
     else if (e.key === 'PageUp' && rows.length) { e.preventDefault(); sel = Math.max(0, sel - 8); markSel(); }
     else if (e.key === 'Enter') { e.preventDefault(); choose(sel, mod); }
+    else if (mod && !e.altKey && e.key.toLowerCase() === 'k') { e.preventDefault(); close(); }
     else if (e.key === 'Escape') {
       e.preventDefault();
-      e.stopPropagation(); // don't also leave Settings/Archive
       if (input.value) { input.value = ''; sel = 0; draw(); } else close();
     }
   });
@@ -144,25 +144,25 @@ export function createPalette(root, provider) {
     if (r) choose(+r.dataset.i, e.metaKey || e.ctrlKey);
   });
   root.addEventListener('click', (e) => { if (e.target.closest('[data-pal="close"]')) close(); });
-  // Clicks inside the palette shouldn't reach the sidebar's own handlers.
-  for (const ev of ['click', 'contextmenu', 'dblclick']) root.addEventListener(ev, (e) => e.stopPropagation());
 
-  function open(q = '') {
-    if (q || !isOpen()) input.value = q; // already open: keep what you typed
-    root.hidden = false;
+  function open() {
     sel = 0;
     lastPointer = null;
     draw();
+    focus();
+  }
+  function focus() {
     window.focus();
     input.focus();
     input.select();
   }
+  let closed = false;
   function close() {
-    root.hidden = true;
-    input.blur();
+    if (closed || busy) return;
+    closed = true;
+    root.classList.add('picked');
+    provider.onClose();
   }
-  const isOpen = () => !root.hidden;
-  const toggle = () => (isOpen() ? close() : open());
 
-  return { open, close, toggle, isOpen, refresh: () => isOpen() && draw() };
+  return { open, close, focus, refresh: draw };
 }

@@ -3,6 +3,7 @@ import * as copyUrl from './features/copy-url.js';
 import * as groupPins from './features/group-pins.js';
 import * as autoClear from './features/auto-clear.js';
 import * as agentHost from './features/agent-host.js';
+import * as searchLauncher from './features/search-launcher.js';
 
 const modules = [copyUrl, groupPins, autoClear, agentHost];
 
@@ -13,7 +14,6 @@ chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(consol
 // this worker awake), so we know synchronously whether to open or close, and side-panel open()
 // must be called right away, inside the shortcut's user gesture.
 const panels = new Map(); // windowId -> port
-const searchOnOpen = new Set(); // windows whose sidebar should open straight into search
 chrome.runtime.onConnect.addListener((port) => {
   if (port.name !== 'snark-panel') return;
   let win = null;
@@ -21,21 +21,19 @@ chrome.runtime.onConnect.addListener((port) => {
     if (msg?.type !== 'hello') return;
     win = msg.windowId;
     panels.set(win, port);
-    if (searchOnOpen.delete(win)) port.postMessage({ type: 'search' });
+    searchLauncher.onPanelHello(win, port); // a search result it was opened to show
   });
   port.onDisconnect.addListener(() => { if (win != null && panels.get(win) === port) panels.delete(win); });
 });
 chrome.commands.onCommand.addListener((command, tab) => {
-  if (!tab || (command !== 'toggle-sidebar' && command !== 'search-snark')) return;
+  if (!tab) return;
+  if (command === 'search-snark') return void searchLauncher.openSearch(tab.windowId).catch(console.warn);
+  if (command !== 'toggle-sidebar') return;
   const port = panels.get(tab.windowId);
-  if (command === 'search-snark') {
-    if (port) return port.postMessage({ type: 'search' });
-    searchOnOpen.add(tab.windowId);
-  } else if (port) {
-    return port.postMessage({ type: 'close' });
-  }
-  chrome.sidePanel.open({ windowId: tab.windowId }).catch(() => searchOnOpen.delete(tab.windowId));
+  if (port) port.postMessage({ type: 'close' });
+  else chrome.sidePanel.open({ windowId: tab.windowId }).catch(() => {});
 });
+searchLauncher.init({ panels });
 
 // Listeners must be registered synchronously on every service-worker start.
 for (const m of modules) m.init?.();

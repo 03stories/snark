@@ -42,7 +42,7 @@ export function entriesFrom({ tree = [], spaces = [], links = {}, favs = [], tab
 
   for (const s of spaces) {
     const count = s.root ? T.pinsUnder(tree, s.root.id).length : 0;
-    out.push({ kind: 'space', id: s.key, title: s.title || 'Unnamed group', icon: s.root?.icon ?? s.icon ?? null, spaceKey: s.key, path: [], count });
+    out.push({ kind: 'space', id: s.key, title: s.title || 'Unnamed group', icon: s.root?.icon ?? s.icon ?? null, spaceKey: s.key, path: [], count, color: s.color ?? null });
   }
   for (const n of tree) {
     if (n.parent == null) continue; // spaces + the Archive root

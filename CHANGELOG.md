@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.0 — Search, centered over the browser
+
+- **Search Snark now opens centered over the page** you're on (⌘⇧K / Ctrl+Shift+K), with the page dimmed behind it, instead of inside the sidebar.
+- **⌘K, / and 🔍 in the sidebar open it as a small window** centered over the browser window. Pages extensions can't draw on also get the window: New Tab, `chrome://` pages and the Web Store.
+- **Picking a result opens the sidebar if it's closed** and shows the result there: its space, its folders expanded, scrolled to and highlighted.
+- Recent picks are now kept in Snark's storage, so they're the same wherever search opens.
+
 ## 1.3.0 — ⌘K search
 
 - **Search everything with ⌘K** (Ctrl+K) in the sidebar, **/**, or 🔍 in the bottom bar. It covers pins, folders, spaces, favorites, open tabs, the Archive and closed tabs. It matches titles, folder paths, URLs and notes, and forgives small typos.

@@ -8,8 +8,6 @@ import * as FI from '../core/favicons.js';
 import * as B from '../core/backup.js';
 import * as AF from '../core/agent-folder.js';
 import { undo as agentUndo } from '../core/agent-ops.js';
-import * as S from '../core/search.js';
-import { createPalette } from './palette.js';
 
 const COLORS = {
   grey: '#9aa0a6', blue: '#4c8bf5', red: '#e8453c', yellow: '#f9bb2d', green: '#3cba54',
@@ -41,6 +39,8 @@ const darkMq = matchMedia('(prefers-color-scheme: dark)');
 
 let windowId;
 let state = null;
+let markReady;
+const ready = new Promise((r) => { markReady = r; }); // first render done
 let current = null;        // key of the space currently shown
 let editing = false;
 let dragSrc = null;
@@ -537,34 +537,15 @@ chrome.runtime.onMessage.addListener((msg) => {
   goToSpace(state.pages[idx].key, 'user');
 });
 
-// ---------------------------------------------------------------- ⌘K search
-const ACTIONS = [
-  { id: 'settings', title: 'Open Settings', keywords: 'preferences options' },
-  { id: 'archive', title: 'Open Archive', keywords: 'closed restore put away' },
-  { id: 'new-space', title: 'New space', keywords: 'create add' },
-  { id: 'pin-current', title: 'Pin current tab', keywords: 'bookmark save' },
-  { id: 'shortcuts', title: 'Edit keyboard shortcuts', keywords: 'keys hotkeys' },
-];
+// ---------------------------------------------------------------- search results
+// Search Snark itself is search/search.html, centered over the browser (see features/search-launcher.js).
+// When you pick a result there, it opens it and the sidebar shows where it lives: its space,
+// folders expanded, scrolled to, glowing for a moment.
 
-function searchEntries() {
-  if (!state) return [];
-  const tabs = [];
-  for (const s of state.spaces) for (const t of spaceTabs(s)) tabs.push({ id: t.id, title: t.title, url: t.url, spaceKey: s.key });
-  for (const t of looseTabs()) tabs.push({ id: t.id, title: t.title, url: t.url, spaceKey: null });
-  return S.entriesFrom({
-    tree: state.tree, spaces: state.spaces, links: state.links, favs: state.favs, tabs, closed: state.archive, actions: ACTIONS,
-  });
-}
-
-function searchIcon(e) {
-  switch (e.kind) {
-    case 'space': return `<span class="sicon">${iconHtml(state.spaceMap.get(e.id) ?? { title: e.title, root: { icon: e.icon } })}</span>`;
-    case 'folder': return e.archived ? ARCHIVE_FOLDER : FOLDER;
-    case 'action': return e.id === 'settings' ? GEAR : e.id === 'archive' ? ARCHIVE : '<span class="pal-glyph">›</span>';
-    case 'tab': return icoImg(e.url, state.tabsById.get(e.id));
-    case 'pin': return icoImg(e.url, state.tabsById.get(state.links[e.id]));
-    default: return icoImg(e.url);
-  }
+/** ⌘K, / and 🔍 in the sidebar. A window, because Chrome can't hand keyboard focus from here to a page. */
+function openSearch() {
+  closeMenu();
+  chrome.runtime.sendMessage({ target: 'sw', type: 'open-search', windowId, inPage: false }).catch(() => {});
 }
 
 // After a pick, the row it landed on glows briefly. Kept here (not on the DOM) because the
@@ -622,58 +603,49 @@ function revealNode(id, { reason = 'reveal' } = {}) {
   render();
 }
 
-async function pickEntry(e, { reveal = false } = {}) {
-  if (!state) return;
+/** Show a picked search result. `open`: you pressed ↵ (the search page already opened it), not ⌘↵. */
+async function showEntry(e, { open = false } = {}) {
+  await ready;
   switch (e.kind) {
     case 'pin':
-      if (e.archived) {
-        if (!reveal) await chrome.tabs.create({ windowId, url: e.url }); // stays archived
-        return revealNode(e.id);
-      }
-      if (!reveal) await T.openPin(e.id, opts());
-      return revealNode(e.id, { reason: reveal ? 'reveal' : 'tab' });
+      return revealNode(e.id, { reason: open && !e.archived ? 'tab' : 'reveal' });
     case 'folder':
       if (e.archived) ui.collapsed.add(`open:${e.id}`);
       else ui.collapsed.delete(e.id);
       return revealNode(e.id);
     case 'space': {
+      if (!state.spaceMap.has(e.id)) return;
       const wasElsewhere = ui.view !== 'spaces';
       setView('spaces');
       setFlash('space', e.id, e.id);
-      if (wasElsewhere && e.id === current && !reveal) enterSpace(current);
-      else goToSpace(e.id, reveal ? 'reveal' : 'user');
+      if (wasElsewhere && e.id === current && open) enterSpace(current);
+      else goToSpace(e.id, open ? 'user' : 'reveal');
       return render();
     }
-    case 'fav': {
-      const f = state.favs.find((x) => x.id === e.id);
-      if (f && !reveal) await F.openFav(f, windowId);
+    case 'fav':
       setFlash('fav', e.id);
       setView('spaces');
       return render();
-    }
     case 'tab': {
-      if (!reveal) {
-        await chrome.tabs.update(e.id, { active: true }).catch(() => {});
-        await chrome.windows.update(windowId, { focused: true }).catch(() => {});
-      }
       setView('spaces');
-      const key = e.spaceKey ?? current;
+      const key = state.spaceMap.has(e.spaceKey) ? e.spaceKey : current;
       setFlash('tab', e.id, key);
-      if (key && key !== current) goToSpace(key, reveal ? 'reveal' : 'tab');
+      if (key && key !== current) goToSpace(key, open ? 'tab' : 'reveal');
       return render();
     }
     case 'closed':
-      if (reveal) { setFlash('archived', e.id); setView('archive'); return render(); }
-      return restore(e.id, windowId);
+      if (open) return;
+      setFlash('archived', e.id);
+      setView('archive');
+      return render();
     case 'action':
       switch (e.id) {
         case 'settings': return setView('settings');
         case 'archive': return setView('archive');
         case 'new-space': setView('spaces'); return createSpace();
-        case 'shortcuts': return chrome.tabs.create({ url: 'chrome://extensions/shortcuts' });
         case 'pin-current': {
           const [tab] = await chrome.tabs.query({ active: true, windowId });
-          if (!tab?.url) return;
+          if (!tab?.url || /^chrome(-extension)?:/.test(tab.url)) return;
           setView('spaces');
           if (tab.groupId === -1 && current) await T.pinTabAt(tab, await rootIdFor(current), null, opts());
           else await T.pinTab(tab, opts());
@@ -684,13 +656,6 @@ async function pickEntry(e, { reveal = false } = {}) {
       }
   }
 }
-
-const palette = createPalette($('#palette'), {
-  entries: searchEntries,
-  currentSpace: () => current,
-  icon: searchIcon,
-  pick: pickEntry,
-});
 
 // ---------------------------------------------------------------- settings reveal
 let lastCfg = '';
@@ -1233,7 +1198,7 @@ document.addEventListener('click', async (e) => {
   if (actEl) {
     e.stopPropagation();
     switch (actEl.dataset.act) {
-      case 'search': palette.open(); return;
+      case 'search': openSearch(); return;
       case 'gear': setView(ui.view === 'settings' ? 'spaces' : 'settings'); return;
       case 'view-archive': setView(ui.view === 'archive' ? 'spaces' : 'archive'); return;
       case 'shortcuts': chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }); return;
@@ -1351,18 +1316,16 @@ document.addEventListener('keydown', (e) => {
   // ⌘K / Ctrl+K anywhere in the sidebar toggles search; "/" opens it when you're not typing somewhere.
   if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'k') {
     e.preventDefault();
-    if (!editing) { closeMenu(); palette.toggle(); }
+    if (!editing) openSearch();
     return;
   }
-  if (e.key === '/' && !e.metaKey && !e.ctrlKey && !editing && !palette.isOpen() && !e.target.closest?.('input, textarea, select')) {
+  if (e.key === '/' && !e.metaKey && !e.ctrlKey && !editing && !e.target.closest?.('input, textarea, select')) {
     e.preventDefault();
-    closeMenu();
-    palette.open();
+    openSearch();
     return;
   }
   if (e.key === 'Escape') {
-    if (palette.isOpen()) palette.close();
-    else if ($('#menu')) closeMenu();
+    if ($('#menu')) closeMenu();
     else if (!editing) setView('spaces');
   }
 });
@@ -1579,7 +1542,7 @@ function connectPanel() {
   const ping = setInterval(() => { try { port.postMessage({ type: 'ping' }); } catch {} }, 20000);
   port.onMessage.addListener((msg) => {
     if (msg?.type === 'close') window.close();
-    if (msg?.type === 'search') palette.open(); // the "Search Snark" shortcut
+    if (msg?.type === 'reveal' && msg.entry) showEntry(msg.entry, { open: msg.open }).catch((e) => console.warn('reveal failed', e));
   });
   port.onDisconnect.addListener(() => { clearInterval(ping); setTimeout(connectPanel, 200); }); // worker restarted
 }
@@ -1588,6 +1551,7 @@ chrome.windows.getCurrent().then(async (w) => {
   connectPanel();
   await F.seedFavorites();
   await render();
+  markReady();
   agent = await AF.getAgentDir().catch(() => ({ status: 'none' }));
   if (agent.status === 'ok') await AF.scaffold(agent.handle).catch((e) => console.warn('agent folder scaffold', e)); // refresh guide/schema after updates
   renderAgentUi();

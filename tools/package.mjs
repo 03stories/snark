@@ -17,7 +17,7 @@ import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const INCLUDE_DIRS = ['core', 'features', 'sidepanel', 'offscreen', 'ui', 'icons'];
+const INCLUDE_DIRS = ['core', 'features', 'sidepanel', 'offscreen', 'search', 'ui', 'icons'];
 const INCLUDE_FILES = ['manifest.json', 'background.js', 'LICENSE'];
 const EXCLUDE = [/(^|\/)\./, /^features\/_template\.js$/, /\.test\.js$/];
 
@@ -74,6 +74,7 @@ for (const [f, buf] of files) {
   }
 }
 for (const ref of ['offscreen/offscreen.html']) need(ref, 'chrome.offscreen.createDocument');
+for (const ref of ['search/search.html']) need(ref, 'features/search-launcher.js');
 if (problems.length) fail(`package check failed:\n  ${problems.join('\n  ')}`);
 
 // ---- write dist/<slug>-<version>/ and the zip

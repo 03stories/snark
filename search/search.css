@@ -1,0 +1,52 @@
+/* Search Snark. Two modes (html[data-mode]):
+   frame  — a transparent full-page iframe over the tab you're on: dimmed backdrop, box centered
+   window — a small popup window centered over the browser window: the box fills it */
+
+/* An iframe is only see-through when its color-scheme matches the page's, so don't declare one. */
+html:root { color-scheme: normal; }
+html, body { height: 100%; margin: 0; }
+body { background: transparent; overflow: hidden; }
+html:not([data-mode]) body { visibility: hidden; } /* until the launcher vouches for this page */
+html[data-mode="window"] body { background: var(--bg); }
+
+#palette { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; }
+#palette.picked { visibility: hidden; }
+.pal-scrim { position: absolute; inset: 0; background: rgba(15, 18, 24, .32); animation: pal-fade .12s ease-out; }
+[data-mode="window"] .pal-scrim { display: none; }
+.pal-box {
+  position: relative; width: min(640px, calc(100% - 32px)); margin-top: min(18vh, 160px);
+  max-height: min(520px, calc(100% - min(18vh, 160px) - 24px));
+  display: flex; flex-direction: column;
+  background: var(--bg); border-radius: 14px; overflow: hidden;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .35), 0 0 0 1px rgba(127, 127, 127, .22);
+  animation: pal-in .16s cubic-bezier(.2, .9, .3, 1.15);
+}
+[data-mode="window"] .pal-box { width: 100%; height: 100%; max-height: none; margin: 0; border-radius: 0; box-shadow: none; animation: none; }
+@keyframes pal-fade { from { opacity: 0; } }
+@keyframes pal-in { from { opacity: 0; transform: translateY(-8px) scale(.985); } }
+@media (prefers-reduced-motion: reduce) { .pal-scrim, .pal-box { animation: none; } }
+
+.pal-field { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.pal-field svg { width: 18px; height: 18px; color: var(--muted); flex: none; }
+.pal-input { flex: 1; min-width: 0; font: inherit; font-size: 18px; color: inherit; background: none; border: 0; outline: none; }
+.pal-input::placeholder { color: var(--muted); }
+.pal-brand { font-size: 11px; font-weight: 600; letter-spacing: .03em; color: var(--muted); opacity: .7; }
+.pal-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 6px; scroll-padding: 30px 0 6px; }
+.pal-head { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 10px 10px 4px; }
+.pal-row { display: flex; align-items: center; gap: 11px; padding: 7px 10px; border-radius: 9px; cursor: default; }
+.pal-row.sel { background: var(--active); }
+.pal-ico { width: 20px; height: 20px; flex: none; display: grid; place-items: center; color: var(--muted); }
+.pal-ico img, .pal-ico svg { width: 16px; height: 16px; border-radius: 3px; }
+.pal-emoji { font-size: 16px; line-height: 1; }
+.pal-initial { width: 16px; height: 16px; border-radius: 5px; display: grid; place-items: center; font-size: 10px; font-weight: 700; color: #fff; }
+.pal-glyph { font-size: 17px; line-height: 1; }
+.pal-text { flex: 1; min-width: 0; }
+.pal-title, .pal-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pal-title { font-size: 14px; }
+.pal-title mark { background: none; color: var(--accent); font-weight: 600; }
+.pal-sub { font-size: 12px; color: var(--muted); }
+.pal-kind { flex: none; font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 5px; padding: 0 6px; }
+.pal-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: #3cba54; margin-right: 6px; }
+.pal-empty { padding: 22px 12px; color: var(--muted); text-align: center; }
+.pal-foot { display: flex; gap: 14px; padding: 8px 16px; border-top: 1px solid var(--line); font-size: 11px; color: var(--muted); flex-wrap: wrap; }
+kbd { font: inherit; font-size: 10.5px; padding: 0 4px; border: 1px solid var(--line); border-radius: 4px; background: var(--hover); }
