@@ -1539,6 +1539,12 @@ $('#version').textContent = `v${chrome.runtime.getManifest().version}`;
 function connectPanel() {
   const port = chrome.runtime.connect({ name: 'snark-panel' });
   port.postMessage({ type: 'hello', windowId });
+  // So the Search Snark shortcut knows whether you pressed it here or on the page.
+  const tellFocus = (e) => { try { port.postMessage({ type: 'focus', focused: e ? e.type === 'focus' : document.hasFocus() }); } catch {} };
+  tellFocus(null);
+  window.addEventListener('focus', tellFocus);
+  window.addEventListener('blur', tellFocus);
+  port.onDisconnect.addListener(() => { window.removeEventListener('focus', tellFocus); window.removeEventListener('blur', tellFocus); });
   const ping = setInterval(() => { try { port.postMessage({ type: 'ping' }); } catch {} }, 20000);
   port.onMessage.addListener((msg) => {
     if (msg?.type === 'close') window.close();

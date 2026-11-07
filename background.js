@@ -14,20 +14,28 @@ chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(consol
 // this worker awake), so we know synchronously whether to open or close, and side-panel open()
 // must be called right away, inside the shortcut's user gesture.
 const panels = new Map(); // windowId -> port
+const panelFocused = new Map(); // windowId -> true while you're in the sidebar (it tells us)
 chrome.runtime.onConnect.addListener((port) => {
   if (port.name !== 'snark-panel') return;
   let win = null;
   port.onMessage.addListener((msg) => {
+    if (msg?.type === 'focus' && win != null) { panelFocused.set(win, !!msg.focused); return; }
     if (msg?.type !== 'hello') return;
     win = msg.windowId;
     panels.set(win, port);
     searchLauncher.onPanelHello(win, port); // a search result it was opened to show
   });
-  port.onDisconnect.addListener(() => { if (win != null && panels.get(win) === port) panels.delete(win); });
+  port.onDisconnect.addListener(() => {
+    if (win != null && panels.get(win) === port) { panels.delete(win); panelFocused.delete(win); }
+  });
 });
 chrome.commands.onCommand.addListener((command, tab) => {
   if (!tab) return;
-  if (command === 'search-snark') return void searchLauncher.openSearch(tab.windowId).catch(console.warn);
+  if (command === 'search-snark') {
+    // Pressed in the sidebar: Chrome can't hand focus from there to the page, so use the centered window.
+    const inPage = !panelFocused.get(tab.windowId);
+    return void searchLauncher.openSearch(tab.windowId, { inPage }).catch(console.warn);
+  }
   if (command !== 'toggle-sidebar') return;
   const port = panels.get(tab.windowId);
   if (port) port.postMessage({ type: 'close' });

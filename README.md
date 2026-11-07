@@ -106,7 +106,10 @@ Private by design: no account, no analytics, no servers. See [PRIVACY.md](PRIVAC
 - **Clearing:** set **Empty after** (Never / 1 day / 1 week / 1 month) at the top of the page. It applies to both put-away items and closed tabs. **Clear now** empties everything after asking.
 
 ### Search (⌘K)
-- **⌘⇧K** (Ctrl+Shift+K), "Search Snark", opens a search box **centered over the page you're on**, with the page dimmed. In the sidebar, **⌘K**, **/** or 🔍 opens the same search as a small window centered over your browser window. Chrome can't move keyboard focus from the sidebar into a page, and some pages are off-limits to extensions (New Tab, `chrome://` pages, the Web Store), so those get the window too. You can change the shortcut at `chrome://extensions/shortcuts`.
+- **⌘K** (Ctrl+Shift+K on Windows/Linux), "Search Snark", opens search from anywhere.
+  - **On a web page:** it appears centered over the page, with the page dimmed.
+  - **In the sidebar** (or press **/**, or click 🔍), and on pages extensions can't draw on (New Tab, `chrome://` pages, the Web Store): it opens as a small window centered over your browser window. Chrome can't move keyboard focus from the sidebar into a page.
+  - **While it's ⌘K, websites don't get ⌘K**, including Slack's quick switcher, Google Docs' insert link, and GitHub, Notion and Linear search. To change it, use `chrome://extensions/shortcuts`. If you installed Snark before 1.4.1, Chrome may still have it on ⌘⇧K; set it there.
 - Type to find any pin, folder, space, favorite, open tab, archived item or closed tab. Every word has to match somewhere: in the title, the folder path (`adoption tax`), the URL or a note. Small typos are fine (`gpwr` finds Georgia Power).
 - **↵** opens the result **and shows it in the sidebar** (opening the sidebar if it's closed): it switches to the result's space, expands its folders, scrolls to it and highlights it for a moment. **⌘↵** (Ctrl+↵) only shows it in the sidebar. **↑/↓** move, and **Esc** clears what you typed, then closes. Clicking outside, or pressing the shortcut again, also closes it.
 - With nothing typed, you see your recent picks and your spaces. A few actions are searchable too, such as *Open Settings*, *New space* and *Pin current tab*.

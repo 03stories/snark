@@ -1,10 +1,10 @@
 // Opens Search Snark centered over the browser, and routes picked results to the sidebar.
 //
-// - From the "Search Snark" shortcut on a normal web page: an iframe with search/search.html is
+// - From the "Search Snark" shortcut (⌘K on Mac) on a normal web page: an iframe with search/search.html is
 //   dropped over the page (centered, page dimmed). The shortcut grants activeTab, so this needs
 //   no extra permissions. It's removed again when you pick something or press Esc.
 // - Where that's not possible (New Tab, chrome:// pages, the Web Store, pages that block it) and
-//   from ⌘K in the sidebar (Chrome won't move keyboard focus from the sidebar into a page):
+//   when you press it in the sidebar (Chrome won't move keyboard focus from the sidebar into a page):
 //   a small popup window centered over the browser window.
 //
 // Each launch gets a one-time token; search.html shows nothing unless its token checks out, so
@@ -37,6 +37,8 @@ function mountOverlay(src) {
   const ID = '__snark_search__';
   const old = document.getElementById(ID);
   if (old) { old.remove(); return 'closed'; } // the shortcut again closes it
+  // The box may have just closed itself on the same keypress; don't pop it right back open.
+  if (Date.now() - (globalThis.__snarkClosedAt ?? 0) < 400) return 'closed';
   const f = document.createElement('iframe');
   f.id = ID;
   f.src = src;
@@ -50,6 +52,7 @@ function mountOverlay(src) {
   const done = () => {
     removeEventListener('message', onMsg, true);
     f.remove();
+    globalThis.__snarkClosedAt = Date.now();
     if (prevFocus && prevFocus.isConnected) prevFocus.focus?.({ preventScroll: true });
   };
   const onMsg = (e) => {
@@ -95,11 +98,19 @@ async function openInPage(tab) {
 
 // ---------------------------------------------------------------- centered window
 
-async function openWindow(windowId) {
+let opening = null; // one window at a time, even if the shortcut and the sidebar both ask
+
+function openWindow(windowId) {
+  opening ??= openWindowNow(windowId).finally(() => { opening = null; });
+  return opening;
+}
+
+async function openWindowNow(windowId) {
   const existing = (await chrome.storage.session.get(WINDOW))[WINDOW];
-  if (existing != null) {
-    const w = await chrome.windows.get(existing).catch(() => null);
-    if (w) return chrome.windows.update(existing, { focused: true });
+  if (existing != null && (await chrome.windows.get(existing).catch(() => null))) {
+    // The shortcut pressed inside the search window closes it; from anywhere else, brings it forward.
+    if (existing === windowId) return chrome.windows.remove(existing).catch(() => {});
+    return chrome.windows.update(existing, { focused: true });
   }
   const token = crypto.randomUUID();
   await putSession(token, { windowId, mode: 'window' });

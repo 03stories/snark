@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.1
+
+- **Search Snark is ⌘K** on Mac, everywhere: over the page, or as a centered window when you press it in the sidebar. Snark works out which one you meant. Windows and Linux keep Ctrl+Shift+K, because Ctrl+K is Chrome's search-the-web shortcut.
+  - Existing installs may keep ⌘⇧K. Change it at `chrome://extensions/shortcuts`.
+  - While it's ⌘K, websites don't receive ⌘K.
+- Pressing the shortcut inside the search window closes it.
+
 ## 1.4.0 — Search, centered over the browser
 
 - **Search Snark now opens centered over the page** you're on (⌘⇧K / Ctrl+Shift+K), with the page dimmed behind it, instead of inside the sidebar.
