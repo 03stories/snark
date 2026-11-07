@@ -8,6 +8,8 @@ import * as FI from '../core/favicons.js';
 import * as B from '../core/backup.js';
 import * as AF from '../core/agent-folder.js';
 import { undo as agentUndo } from '../core/agent-ops.js';
+import * as S from '../core/search.js';
+import { createPalette } from './palette.js';
 
 const COLORS = {
   grey: '#9aa0a6', blue: '#4c8bf5', red: '#e8453c', yellow: '#f9bb2d', green: '#3cba54',
@@ -21,6 +23,8 @@ const isArchiveFolder = (n) => n?.type === 'folder' && n.parent != null && /^arc
 const ARCH = T.ARCHIVE_ID; // the global Archive (its page key and tree id)
 const ARCHIVE_OPTS = [['0', 'Never'], ['24', '1 day'], ['168', '1 week'], ['720', '1 month']];
 const ARCHIVE = `<svg viewBox="0 0 16 16"><path d="M2 3.5h12v3H2zM3 6.5v6.5h10V6.5M6.5 9h3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>`;
+const SEARCH = `<svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`;
+const MOD = /Mac/.test(navigator.platform ?? '') ? '⌘' : 'Ctrl+';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -192,6 +196,7 @@ async function render() {
   if (!on && ui.view === 'spaces') { $('#favorites').hidden = true; $('#pages').hidden = true; }
   renderBar();
   paintView();
+  applyFlash();
 }
 
 // ---------------------------------------------------------------- views: spaces | archive | settings
@@ -220,7 +225,7 @@ function setView(v) {
     const idx = Math.max(0, spaceIndex(current));
     pagesEl.scrollTo({ left: idx * pagesEl.clientWidth, behavior: 'instant' });
   }
-  if (state) { renderBar(); paintView(); }
+  if (state) { renderBar(); paintView(); applyFlash(); }
 }
 
 function renderFavorites() {
@@ -343,6 +348,7 @@ function tabHtml(t, depth) {
 function renderBar() {
   const on = state.cfg.groupPins.enabled;
   $('#bar').innerHTML = `
+    <button class="bar-btn" data-act="search" title="Search (${MOD}K)">${SEARCH}</button>
     <button class="bar-btn${ui.view === 'archive' ? ' on' : ''}" data-act="view-archive" data-drop="archive" title="Archive"${on ? '' : ' hidden'}>${ARCHIVE}</button>
     <button class="bar-btn${ui.view === 'settings' ? ' on' : ''}" data-act="gear" title="Settings">${GEAR}</button>
     <div class="bar-spaces">${(on ? state.spaces : []).map((s) =>
@@ -465,6 +471,7 @@ pagesEl.addEventListener('scrollend', () => {
   const reason = pendingReason ?? 'user';
   pendingReason = null;
   if (key !== current) onSpaceChanged(key, reason);
+  applyFlash(); // a search result may be waiting for this page to arrive
 });
 
 function goToSpace(key, reason) {
@@ -528,6 +535,161 @@ chrome.runtime.onMessage.addListener((msg) => {
   const n = state.pages.length;
   const idx = (Math.max(0, spaceIndex(current)) + msg.dir + n) % n;
   goToSpace(state.pages[idx].key, 'user');
+});
+
+// ---------------------------------------------------------------- ⌘K search
+const ACTIONS = [
+  { id: 'settings', title: 'Open Settings', keywords: 'preferences options' },
+  { id: 'archive', title: 'Open Archive', keywords: 'closed restore put away' },
+  { id: 'new-space', title: 'New space', keywords: 'create add' },
+  { id: 'pin-current', title: 'Pin current tab', keywords: 'bookmark save' },
+  { id: 'shortcuts', title: 'Edit keyboard shortcuts', keywords: 'keys hotkeys' },
+];
+
+function searchEntries() {
+  if (!state) return [];
+  const tabs = [];
+  for (const s of state.spaces) for (const t of spaceTabs(s)) tabs.push({ id: t.id, title: t.title, url: t.url, spaceKey: s.key });
+  for (const t of looseTabs()) tabs.push({ id: t.id, title: t.title, url: t.url, spaceKey: null });
+  return S.entriesFrom({
+    tree: state.tree, spaces: state.spaces, links: state.links, favs: state.favs, tabs, closed: state.archive, actions: ACTIONS,
+  });
+}
+
+function searchIcon(e) {
+  switch (e.kind) {
+    case 'space': return `<span class="sicon">${iconHtml(state.spaceMap.get(e.id) ?? { title: e.title, root: { icon: e.icon } })}</span>`;
+    case 'folder': return e.archived ? ARCHIVE_FOLDER : FOLDER;
+    case 'action': return e.id === 'settings' ? GEAR : e.id === 'archive' ? ARCHIVE : '<span class="pal-glyph">›</span>';
+    case 'tab': return icoImg(e.url, state.tabsById.get(e.id));
+    case 'pin': return icoImg(e.url, state.tabsById.get(state.links[e.id]));
+    default: return icoImg(e.url);
+  }
+}
+
+// After a pick, the row it landed on glows briefly. Kept here (not on the DOM) because the
+// sidebar re-renders as tabs open, so the glow is re-applied, mid-animation, after each render.
+let flash = null; // { kind, id, scope, at, scroll }
+const FLASH_MS = 1800;
+
+function setFlash(kind, id, scope = null) {
+  flash = { kind, id: String(id), scope, at: Date.now(), scroll: true };
+}
+
+function applyFlash() {
+  if (!flash) return;
+  const elapsed = Date.now() - flash.at;
+  if (elapsed > FLASH_MS) { flash = null; return; }
+  const attr = flash.kind === 'archived' ? 'idx' : 'id';
+  const sel = `[data-kind="${flash.kind}"][data-${attr}="${CSS.escape(flash.id)}"]`;
+  const scope = flash.scope != null ? document.querySelector(`.page[data-space="${CSS.escape(flash.scope)}"]`) : document;
+  const el = scope?.querySelector(sel);
+  if (!el) return;
+  el.classList.add('found');
+  el.style.animationDelay = `-${elapsed}ms`;
+  if (flash.scroll && !scrolling) {
+    flash.scroll = false;
+    const box = el.closest('.page, .view');
+    if (!box) return;
+    const r = el.getBoundingClientRect();
+    const b = box.getBoundingClientRect();
+    if (r.top < b.top + 8 || r.bottom > b.bottom - 8) {
+      box.scrollTo({ top: box.scrollTop + (r.top - b.top) - b.height / 3, behavior: 'smooth' });
+    }
+  }
+}
+
+/** Show a pin or folder in the sidebar: its space (or the Archive), folders expanded, scrolled to, glowing. */
+function revealNode(id, { reason = 'reveal' } = {}) {
+  const tree = state.tree;
+  const n = T.byId(tree, id);
+  if (!n) return;
+  const archived = T.isArchived(tree, id);
+  for (let a = T.byId(tree, n.parent); a && a.parent != null; a = T.byId(tree, a.parent)) {
+    if (archived) ui.collapsed.add(`open:${a.id}`); // archived folders start collapsed, so "open" is the flag
+    else ui.collapsed.delete(a.id);
+  }
+  saveUi();
+  if (archived) {
+    setFlash(n.type === 'pin' ? 'apin' : 'afolder', id);
+    setView('archive');
+  } else {
+    const key = T.rootOf(tree, id)?.id;
+    setFlash(n.type, id, key);
+    setView('spaces');
+    if (key !== current) goToSpace(key, reason);
+  }
+  render();
+}
+
+async function pickEntry(e, { reveal = false } = {}) {
+  if (!state) return;
+  switch (e.kind) {
+    case 'pin':
+      if (e.archived) {
+        if (!reveal) await chrome.tabs.create({ windowId, url: e.url }); // stays archived
+        return revealNode(e.id);
+      }
+      if (!reveal) await T.openPin(e.id, opts());
+      return revealNode(e.id, { reason: reveal ? 'reveal' : 'tab' });
+    case 'folder':
+      if (e.archived) ui.collapsed.add(`open:${e.id}`);
+      else ui.collapsed.delete(e.id);
+      return revealNode(e.id);
+    case 'space': {
+      const wasElsewhere = ui.view !== 'spaces';
+      setView('spaces');
+      setFlash('space', e.id, e.id);
+      if (wasElsewhere && e.id === current && !reveal) enterSpace(current);
+      else goToSpace(e.id, reveal ? 'reveal' : 'user');
+      return render();
+    }
+    case 'fav': {
+      const f = state.favs.find((x) => x.id === e.id);
+      if (f && !reveal) await F.openFav(f, windowId);
+      setFlash('fav', e.id);
+      setView('spaces');
+      return render();
+    }
+    case 'tab': {
+      if (!reveal) {
+        await chrome.tabs.update(e.id, { active: true }).catch(() => {});
+        await chrome.windows.update(windowId, { focused: true }).catch(() => {});
+      }
+      setView('spaces');
+      const key = e.spaceKey ?? current;
+      setFlash('tab', e.id, key);
+      if (key && key !== current) goToSpace(key, reveal ? 'reveal' : 'tab');
+      return render();
+    }
+    case 'closed':
+      if (reveal) { setFlash('archived', e.id); setView('archive'); return render(); }
+      return restore(e.id, windowId);
+    case 'action':
+      switch (e.id) {
+        case 'settings': return setView('settings');
+        case 'archive': return setView('archive');
+        case 'new-space': setView('spaces'); return createSpace();
+        case 'shortcuts': return chrome.tabs.create({ url: 'chrome://extensions/shortcuts' });
+        case 'pin-current': {
+          const [tab] = await chrome.tabs.query({ active: true, windowId });
+          if (!tab?.url) return;
+          setView('spaces');
+          if (tab.groupId === -1 && current) await T.pinTabAt(tab, await rootIdFor(current), null, opts());
+          else await T.pinTab(tab, opts());
+          const id = await T.pinIdForTab(tab.id);
+          if (id) { await render(); revealNode(id); }
+          return;
+        }
+      }
+  }
+}
+
+const palette = createPalette($('#palette'), {
+  entries: searchEntries,
+  currentSpace: () => current,
+  icon: searchIcon,
+  pick: pickEntry,
 });
 
 // ---------------------------------------------------------------- settings reveal
@@ -1071,6 +1233,7 @@ document.addEventListener('click', async (e) => {
   if (actEl) {
     e.stopPropagation();
     switch (actEl.dataset.act) {
+      case 'search': palette.open(); return;
       case 'gear': setView(ui.view === 'settings' ? 'spaces' : 'settings'); return;
       case 'view-archive': setView(ui.view === 'archive' ? 'spaces' : 'archive'); return;
       case 'shortcuts': chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }); return;
@@ -1185,7 +1348,23 @@ document.addEventListener('error', (e) => {
 }, true);
 
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') { if ($('#menu')) closeMenu(); else if (!editing) setView('spaces'); }
+  // ⌘K / Ctrl+K anywhere in the sidebar toggles search; "/" opens it when you're not typing somewhere.
+  if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    if (!editing) { closeMenu(); palette.toggle(); }
+    return;
+  }
+  if (e.key === '/' && !e.metaKey && !e.ctrlKey && !editing && !palette.isOpen() && !e.target.closest?.('input, textarea, select')) {
+    e.preventDefault();
+    closeMenu();
+    palette.open();
+    return;
+  }
+  if (e.key === 'Escape') {
+    if (palette.isOpen()) palette.close();
+    else if ($('#menu')) closeMenu();
+    else if (!editing) setView('spaces');
+  }
 });
 window.addEventListener('blur', closeMenu);
 
@@ -1398,7 +1577,10 @@ function connectPanel() {
   const port = chrome.runtime.connect({ name: 'snark-panel' });
   port.postMessage({ type: 'hello', windowId });
   const ping = setInterval(() => { try { port.postMessage({ type: 'ping' }); } catch {} }, 20000);
-  port.onMessage.addListener((msg) => { if (msg?.type === 'close') window.close(); });
+  port.onMessage.addListener((msg) => {
+    if (msg?.type === 'close') window.close();
+    if (msg?.type === 'search') palette.open(); // the "Search Snark" shortcut
+  });
   port.onDisconnect.addListener(() => { clearInterval(ping); setTimeout(connectPanel, 200); }); // worker restarted
 }
 chrome.windows.getCurrent().then(async (w) => {

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0 — ⌘K search
+
+- **Search everything with ⌘K** (Ctrl+K) in the sidebar, **/**, or 🔍 in the bottom bar. It covers pins, folders, spaces, favorites, open tabs, the Archive and closed tabs. It matches titles, folder paths, URLs and notes, and forgives small typos.
+- **↵ opens the result and shows it in the sidebar.** The sidebar jumps to its space, expands its folders, scrolls to it and highlights it. **⌘↵** only shows it.
+- With nothing typed, the palette lists your recent picks and your spaces. It can also run a few actions: Open Settings, Open Archive, New space, Pin current tab.
+- **New shortcut: ⌘⇧K / Ctrl+Shift+K ("Search Snark")** opens the sidebar straight into search from any page.
+
 ## 1.2.0 — The agent folder keeps working with the sidebar closed
 
 - **Agent folder sync moved to the background.** A hidden offscreen page holds the folder and the background script applies commands. That page only exists while an agent folder is connected.

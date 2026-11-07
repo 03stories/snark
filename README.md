@@ -105,6 +105,12 @@ Private by design: no account, no analytics, no servers. See [PRIVACY.md](PRIVAC
 - **The list:** items are shown newest first, with a subtle label for the space they came from. ↩︎ **Restore** puts an item back exactly where it was.
 - **Clearing:** set **Empty after** (Never / 1 day / 1 week / 1 month) at the top of the page. It applies to both put-away items and closed tabs. **Clear now** empties everything after asking.
 
+### Search (⌘K)
+- Press **⌘K** (Ctrl+K) in the sidebar, press **/**, or click 🔍 in the bottom bar. Type to find any pin, folder, space, favorite, open tab, archived item or closed tab. Every word has to match somewhere: in the title, the folder path (`adoption tax`), the URL or a note. Small typos are fine (`gpwr` finds Georgia Power).
+- **↵** opens the result and shows it in the sidebar: the sidebar switches to its space, expands its folders, scrolls to it and highlights it for a moment. **⌘↵** (Ctrl+↵) only shows it, without opening anything. **↑/↓** move through results, and **Esc** clears what you typed, then closes.
+- With nothing typed, you see your recent picks and your spaces. A few actions are searchable too, such as *Open Settings*, *New space* and *Pin current tab*.
+- **⌘⇧K** (Ctrl+Shift+K), "Search Snark", works from any page: it opens the sidebar straight into search. You can change it at `chrome://extensions/shortcuts`.
+
 ### Opening the sidebar
 - Click the toolbar icon, or press **⌘B** / **Ctrl+B** ("Open or close the Snark sidebar"). You can change the key at `chrome://extensions/shortcuts`. Note that while it's set to ⌘B, websites like Gmail or Google Docs won't get ⌘B for **bold**.
 - To put the sidebar on the left, set **Side panel → Show on left** at `chrome://settings/appearance`.
@@ -139,6 +145,7 @@ background.js          service worker: opens the sidebar from the toolbar, loads
 features/registry.js   feature list + settings (drives the ⚙ reveal)
 features/*.js          one file per feature (copy-url, group-pins, auto-clear, _template)
 core/tree.js           spaces/folders/pins data model + tab-group actions
+core/search.js         ⌘K search: entries + ranking (pure; sidepanel/palette.js is the UI)
 core/archive.js        Recently cleared
 core/favorites.js      Favorites row
 core/agent-ops.js      agent command engine (ops, validation, undo)
