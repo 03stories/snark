@@ -163,7 +163,7 @@ core/clipboard.js      offscreen-document clipboard writes
 core/toast.js          on-page toast
 sidepanel/             the sidebar UI (sidepanel.js) + gradient themes (themes.js)
 tests/                 unit tests: tree model, agent commands, inbox processing, archive, icons (npm test)
-tools/                 package.mjs (store zip), make-icons.py, make-promo.py
+tools/                 package.mjs (store zip), make-icons.py, store/ (Chrome Web Store images)
 store/                 store listing images (not shipped in the extension)
 docs/                  PUBLISHING.md checklist, STORE_LISTING.md draft
 ```

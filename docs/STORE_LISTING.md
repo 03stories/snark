@@ -64,8 +64,18 @@ There's no offscreen reason specifically for file-system access, which is why th
 - **Optional:** if you connect an agent folder, your spaces, pins and open-tab URLs are written to that local folder.
 - **Privacy policy URL:** link to `PRIVACY.md` on GitHub, or a GitHub Pages copy of it.
 
-## Assets still needed
-- [ ] Icon 128×128 (plus 16/32/48 in the package)
-- [ ] 1–5 screenshots, 1280×800
-- [ ] Small promo tile, 440×280
+## Images (in `store/`, 24-bit PNG, no alpha)
+Upload in this order. They're built from Snark's real sidebar and search UI with demo data; see `tools/store/README.md` to rebuild them.
+
+| File | Slot | What it says |
+|---|---|---|
+| `screenshot-1-overview.png` | Screenshot 1 (1280×800) | "Your tabs, bookmarked, in spaces." The sidebar you miss, in the browser you already use. |
+| `screenshot-2-spaces.png` | Screenshot 2 | "Swipe between spaces. Feel organized." Each space is a real tab group. |
+| `screenshot-3-pinned.png` | Screenshot 3 | "Pinned tabs that actually stay pinned." Wander off; one click back. |
+| `screenshot-4-search.png` | Screenshot 4 | "⌘K. Because you have 214 tabs." Search that shows you where you put it. |
+| `screenshot-5-agent.png` | Screenshot 5 | "Hand the mess to your AI." The agent folder, as a three-step story. |
+| `promo-440x280.png` | Small promo tile | Snark · "Tabs, tamed. Mostly." |
+| `marquee-1400x560.png` | Marquee (optional) | Headline 1 with the sidebar. |
+
+## Still to do in the dashboard
 - [ ] Support URL: GitHub Issues
