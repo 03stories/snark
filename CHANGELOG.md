@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.2
+
+- **A simpler bottom bar:** 🗄 Archive on the left, your spaces centered, ＋ on the right.
+- **🔍 Search and ⚙ Settings moved to the top right**, beside the space name (and on the Archive and Settings screens).
+
 ## 1.4.1
 
 - **Search Snark is ⌘K** on Mac, everywhere: over the page, or as a centered window when you press it in the sidebar. Snark works out which one you meant. Windows and Linux keep Ctrl+Shift+K, because Ctrl+K is Chrome's search-the-web shortcut.

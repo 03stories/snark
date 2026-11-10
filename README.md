@@ -14,7 +14,7 @@ Private by design: no account, no analytics, no servers. See [PRIVACY.md](PRIVAC
 3. Click the toolbar icon to open the sidebar. Pin the icon in the toolbar so it's always there.
 4. After you edit any file, click the reload icon on the extension's card. Close and reopen the sidebar to pick up changes to the sidebar itself.
 
-**⌘B** (Ctrl+B on Windows/Linux) opens and closes the sidebar. Settings and the Archive open from the bottom bar (⚙ and 🗄) as their own screens; click a space icon or press Esc to go back.
+**⌘B** (Ctrl+B on Windows/Linux) opens and closes the sidebar. The Archive opens from 🗄 in the bottom bar and Settings from ⚙ at the top right, next to 🔍 search. Each is its own screen; click a space icon or press Esc to go back.
 
 **Moving the folder:** the manifest's `key` gives Snark a fixed ID (`ehphddjhccoiekiolhdhjcngcilbhijl`). But **removing an extension in Chrome deletes its data**, so before moving or re-adding the folder, export a backup: **⚙ → Backup → Export**. Then click **Load unpacked** and choose the new folder; with the same ID, Chrome should update the existing install. If Chrome adds a second copy instead, remove the old one, then use **Import** and choose your agent folder again. Export and Import are also how you move to another computer or Chrome profile.
 
@@ -34,7 +34,7 @@ Private by design: no account, no analytics, no servers. See [PRIVACY.md](PRIVAC
  NOT IN A SPACE · 1
    Hacker News                 ← ungrouped tabs (any page)
 └─────────────────────────┘
-  🗄 ⚙   💼  🏠  📚    ＋        ← Archive · Settings · space icons · new space
+  🗄       💼  🏠  📚       ＋     ← Archive · space icons · new space
 ```
 
 ### Favorites
@@ -108,7 +108,7 @@ Private by design: no account, no analytics, no servers. See [PRIVACY.md](PRIVAC
 ### Search (⌘K)
 - **⌘K** (Ctrl+Shift+K on Windows/Linux), "Search Snark", opens search from anywhere.
   - **On a web page:** it appears centered over the page, with the page dimmed.
-  - **In the sidebar** (or press **/**, or click 🔍), and on pages extensions can't draw on (New Tab, `chrome://` pages, the Web Store): it opens as a small window centered over your browser window. Chrome can't move keyboard focus from the sidebar into a page.
+  - **In the sidebar** (or press **/**, or click 🔍 at the top right), and on pages extensions can't draw on (New Tab, `chrome://` pages, the Web Store): it opens as a small window centered over your browser window. Chrome can't move keyboard focus from the sidebar into a page.
   - **While it's ⌘K, websites don't get ⌘K**, including Slack's quick switcher, Google Docs' insert link, and GitHub, Notion and Linear search. To change it, use `chrome://extensions/shortcuts`. If you installed Snark before 1.4.1, Chrome may still have it on ⌘⇧K; set it there.
 - Type to find any pin, folder, space, favorite, open tab, archived item or closed tab. Every word has to match somewhere: in the title, the folder path (`lisbon flights`), the URL or a note. Small typos are fine (`sprnt` finds Sprint board).
 - **↵** opens the result **and shows it in the sidebar** (opening the sidebar if it's closed): it switches to the result's space, expands its folders, scrolls to it and highlights it for a moment. **⌘↵** (Ctrl+↵) only shows it in the sidebar. **↑/↓** move, and **Esc** clears what you typed, then closes. Clicking outside, or pressing the shortcut again, also closes it.

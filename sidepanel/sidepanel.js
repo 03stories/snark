@@ -23,6 +23,11 @@ const ARCHIVE_OPTS = [['0', 'Never'], ['24', '1 day'], ['168', '1 week'], ['720'
 const ARCHIVE = `<svg viewBox="0 0 16 16"><path d="M2 3.5h12v3H2zM3 6.5v6.5h10V6.5M6.5 9h3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>`;
 const SEARCH = `<svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`;
 const MOD = /Mac/.test(navigator.platform ?? '') ? '⌘' : 'Ctrl+';
+// Search and Settings sit at the right of whatever header is on screen (space, Archive, Settings).
+const headTools = () => `<span class="head-tools">
+  <button data-act="search" title="Search (${MOD}K)">${SEARCH}</button>
+  <button data-act="gear" class="${ui.view === 'settings' ? 'on' : ''}" title="Settings">${GEAR}</button>
+</span>`;
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -261,6 +266,7 @@ function iconHtml(s) {
 
 function emptyPageHtml() {
   return `<section class="page" data-space="">
+    <div class="row page-head">${headTools()}</div>
     <div class="empty muted">No spaces yet.<br><br><button class="primary" data-act="new-space">Create a space</button></div>
     ${looseHtml()}
   </section>`;
@@ -274,6 +280,7 @@ function pageHtml(s) {
     <div class="row page-head" data-kind="space" data-id="${k}">
       <span class="sicon">${iconHtml(s)}</span><span class="title">${esc(s.title || 'Unnamed group')}</span>
       <span class="acts"><button data-act="menu" title="Space options">⋯</button></span>
+      ${headTools()}
     </div>
     <div class="tree">
       ${s.root ? childrenHtml(s.root.id, 0) : ''}
@@ -347,14 +354,19 @@ function tabHtml(t, depth) {
 
 function renderBar() {
   const on = state.cfg.groupPins.enabled;
+  // Archive on the left, the spaces centered, ＋ on the right. (Settings only lands here while
+  // spaces are off, since there's no space header to hold it then.)
   $('#bar').innerHTML = `
-    <button class="bar-btn" data-act="search" title="Search (${MOD}K)">${SEARCH}</button>
-    <button class="bar-btn${ui.view === 'archive' ? ' on' : ''}" data-act="view-archive" data-drop="archive" title="Archive"${on ? '' : ' hidden'}>${ARCHIVE}</button>
-    <button class="bar-btn${ui.view === 'settings' ? ' on' : ''}" data-act="gear" title="Settings">${GEAR}</button>
+    ${on
+      ? `<button class="bar-btn${ui.view === 'archive' ? ' on' : ''}" data-act="view-archive" data-drop="archive" title="Archive">${ARCHIVE}</button>`
+      : `<button class="bar-btn${ui.view === 'settings' ? ' on' : ''}" data-act="gear" title="Settings">${GEAR}</button>`}
     <div class="bar-spaces">${(on ? state.spaces : []).map((s) =>
       `<button class="bar-space${ui.view === 'spaces' && s.key === current ? ' on' : ''}" data-act="goto" data-space="${esc(s.key)}" data-drop="bar" title="${esc(s.title || 'Unnamed group')}">${iconHtml(s)}</button>`
     ).join('')}</div>
-    <button class="bar-btn" data-act="new-space" title="New space"${on ? '' : ' hidden'}>＋</button>`;
+    <button class="bar-btn" data-act="new-space" title="New space"${on ? '' : ' style="visibility:hidden"'}>＋</button>`;
+  // the Settings header is static HTML; keep its gear's state in step
+  $('#settings .view-head .head-tools')?.remove();
+  $('#settings .view-head').insertAdjacentHTML('beforeend', headTools());
 }
 
 function markBar() {
@@ -403,7 +415,7 @@ function archivePageHtml() {
   const closed = state.archive;
   const after = String(state.cfg.autoClear.archiveAfter ?? '720');
   return `<div class="archive-page">
-    <div class="view-head"><span class="sicon">🗄</span><span class="title">Archive</span></div>
+    <div class="view-head"><span class="sicon">🗄</span><span class="title">Archive</span>${headTools()}</div>
     <div class="arch-settings">
       <span class="muted">Empty after</span>
       <span class="seg">${ARCHIVE_OPTS.map(([v, l]) => `<button data-act="arch-after" data-v="${v}" class="${after === v ? 'on' : ''}">${l}</button>`).join('')}</span>
