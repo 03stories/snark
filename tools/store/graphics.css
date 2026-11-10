@@ -149,8 +149,11 @@ body.capture .fit { border-radius: 0; box-shadow: none; }
 .a4 { --accent: #8fb3ff; color: #fff; background: radial-gradient(1000px 500px at 50% 0%, #2a3866 0%, transparent 70%), linear-gradient(180deg, #161c33 0%, #0e1222 100%); }
 .a4 .hl { color: #fff; font-size: 50px; display: flex; align-items: center; gap: 18px; }
 .a4 .lede { color: #aab4d0; }
+.a4 .top { top: 44px; }
+.a4 .top > div { display: grid; gap: 22px; }
+.keys { margin-right: 4px; }
 .keys { display: inline-flex; gap: 8px; }
-.keys kbd { display: grid; place-items: center; min-width: 60px; height: 58px; padding: 0 12px; border-radius: 12px; font: 600 30px var(--display); color: var(--ink); background: linear-gradient(#ffffff, #dfe4ee); box-shadow: 0 4px 0 #9aa3b8, 0 10px 24px rgba(0, 0, 0, .35); }
+.keys kbd { display: grid; place-items: center; min-width: 50px; height: 48px; padding: 0 10px; border-radius: 10px; font: 600 24px var(--display); color: var(--ink); background: linear-gradient(#ffffff, #dfe4ee); box-shadow: 0 4px 0 #9aa3b8, 0 10px 24px rgba(0, 0, 0, .35); }
 .a4 .win { box-shadow: 0 40px 100px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .08); }
 .a4 .callout { color: #ffd66b; }
 .a4 .arrows path { stroke: #ffd66b; }

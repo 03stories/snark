@@ -187,7 +187,7 @@ const A4 = `<section class="ab a4" id="a4" style="width:1280px;height:800px">
       <p class="lede">Find any pin, folder or tab. Snark opens it and shows you where you put it.</p>
     </div>
   </div>
-  <div class="stage" style="left:60px;top:196px">${browser({ w: 1160, h: 580, url: 'https://docs.lumen.so/launch-checklist', active: 'Launch checklist', extraTabs: [['Launch checklist', 'docs.lumen.so']], page: PAGE_CHECKLIST, side: 'found', overlay: searchBox() })}</div>
+  <div class="stage" style="left:60px;top:214px">${browser({ w: 1160, h: 566, url: 'https://docs.lumen.so/launch-checklist', active: 'Launch checklist', extraTabs: [['Launch checklist', 'docs.lumen.so']], page: PAGE_CHECKLIST, side: 'found', overlay: searchBox() })}</div>
   <div class="callout" data-anchor='.sb .row[data-id="launchchk"]' data-side="right" data-bend="1" style="--dx:70px;--dy:150px">found it. it was in Q4 launch.</div>
 </section>`;
 
