@@ -1,6 +1,6 @@
 # Snark privacy policy
 
-_Last updated: November 5, 2026_
+_Last updated: November 10, 2026_
 
 Snark is a Chrome extension that organizes your tabs into spaces, pinned tabs, folders and favorites
 in Chrome's side panel. It is built to work entirely on your own computer.
@@ -12,8 +12,12 @@ in Chrome's side panel. It is built to work entirely on your own computer.
 
 ## What Snark reads
 To show and organize your tabs, Snark reads the **titles, URLs and icons of your open tabs** and your
-**tab groups**. It does not read the content of web pages. The only exception is the "Copied URL" toast,
-which briefly adds a small label to the page you're on after you press the Copy URL shortcut, and then removes it.
+**tab groups**. It does not read the content of web pages. Two features place something on the page you're on, only
+after you press their shortcut, and never read the page:
+- the **"Copied URL" toast**, a small label that disappears after a moment;
+- the **Search Snark box** (⌘K / Ctrl+Shift+K), shown over the page in a frame that belongs to the
+  extension. It searches only Snark's own data, and is removed when you close it or pick a result. The
+  page can't see what you type or what it shows.
 
 ## What Snark stores, and where
 In Chrome's extension storage, on your computer:
@@ -21,6 +25,7 @@ In Chrome's extension storage, on your computer:
 - the Archive (items you put away, and recently closed tabs)
 - remembered site icons for pages you've opened
 - your settings
+- your most recent search picks, so search can suggest them
 
 Chrome may sync your **settings** (not your pins) across your signed-in Chrome browsers via Chrome Sync,
 if you use it.

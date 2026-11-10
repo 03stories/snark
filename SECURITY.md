@@ -9,7 +9,11 @@ Security tab of this repository), not a public issue. Include steps to reproduce
   requests it can make are image requests for site icons, and Google's favicon service is only
   contacted when you turn that option on.
 - **No host permissions.** Snark doesn't ask for access to the websites you visit. The Copy URL toast
-  uses `activeTab`, which only applies to the tab you're on and only after you press the shortcut.
+  and the Search Snark box use `activeTab`, which only applies to the tab you're on and only after you
+  press the shortcut.
+- **Search page.** `search/search.html` is web-accessible so it can be shown over the page you're on.
+  It renders nothing unless the background script opened it, using a one-time token, so other sites
+  can't embed it to show your data.
 - **HTML is escaped.** Titles, URLs and notes are escaped before they're put into the sidebar's HTML.
 - **Agent folder trust model.** If you connect an agent folder, any program that can write to that
   folder can change your Snark data: add, move, rename or archive pins and spaces. Safeguards:
