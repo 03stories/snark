@@ -5,19 +5,19 @@ import { ARCHIVE_ID } from '../core/tree.js';
 
 const tree = [
   { id: 'home', type: 'folder', parent: null, title: 'Home', icon: '🏠' },
-  { id: 'adopt', type: 'folder', parent: 'home', title: 'Adoption' },
-  { id: 'money', type: 'folder', parent: 'adopt', title: 'Costs & money' },
-  { id: 'irs', type: 'pin', parent: 'money', title: 'IRS Adoption Credit', url: 'https://www.irs.gov/credits-deductions/individuals/adoption-credit', note: 'Form 8839' },
+  { id: 'trip', type: 'folder', parent: 'home', title: 'Travel' },
+  { id: 'money', type: 'folder', parent: 'trip', title: 'Bookings & money' },
+  { id: 'irs', type: 'pin', parent: 'money', title: 'LHB Travel Credit', url: 'https://www.lhb.test/credits-deductions/individuals/travel-credit', note: 'Room 8839' },
   { id: 'bills', type: 'folder', parent: 'home', title: 'Bills' },
-  { id: 'power', type: 'pin', parent: 'bills', title: 'Georgia Power', url: 'https://www.georgiapower.com/' },
-  { id: 'work', type: 'folder', parent: null, title: 'Forward' },
+  { id: 'power', type: 'pin', parent: 'bills', title: 'Gas & Power', url: 'https://www.gaspower.test/' },
+  { id: 'work', type: 'folder', parent: null, title: 'Projects' },
   { id: 'gh', type: 'pin', parent: 'work', title: 'GitHub', url: 'https://github.com/03stories/snark' },
   { id: ARCHIVE_ID, type: 'folder', parent: null, title: 'Archive' },
   { id: 'old', type: 'pin', parent: ARCHIVE_ID, title: 'Old GitHub board', url: 'https://github.com/orgs/x/projects/1' },
 ];
 const spaces = [
   { key: 'home', title: 'Home', root: tree[0] },
-  { key: 'work', title: 'Forward', root: tree[6] },
+  { key: 'work', title: 'Projects', root: tree[6] },
 ];
 const entries = S.entriesFrom({
   tree, spaces, links: { gh: 5 },
@@ -30,7 +30,7 @@ const ids = (q, o) => S.search(entries, q, o).map((h) => S.keyOf(h.entry));
 
 test('entries carry folder paths starting at the space (with its icon)', () => {
   const irs = entries.find((e) => e.id === 'irs');
-  assert.deepEqual(irs.path, ['🏠 Home', 'Adoption', 'Costs & money']);
+  assert.deepEqual(irs.path, ['🏠 Home', 'Travel', 'Bookings & money']);
   assert.equal(irs.spaceKey, 'home');
   assert.equal(entries.find((e) => e.id === 'old').archived, true);
   assert.deepEqual(entries.find((e) => e.id === 'old').path, ['Archive']);
@@ -45,20 +45,20 @@ test('title prefix beats everything; pins outrank archived copies', () => {
 });
 
 test('every word must match, across title, folder path and URL', () => {
-  assert.deepEqual(ids('adoption irs').slice(0, 1), ['pin:irs']);
+  assert.deepEqual(ids('travel lhb').slice(0, 1), ['pin:irs']);
   assert.ok(ids('money credit').includes('pin:irs'));      // path + title
-  assert.ok(ids('irs.gov').includes('pin:irs'));           // url
+  assert.ok(ids('lhb.test').includes('pin:irs'));           // url
   assert.ok(ids('8839').includes('pin:irs'));              // note
-  assert.deepEqual(ids('adoption zebra'), []);
+  assert.deepEqual(ids('travel zebra'), []);
 });
 
 test('folders and spaces are findable', () => {
   assert.equal(ids('bills')[0], 'folder:bills');
-  assert.equal(ids('forw')[0], 'space:work');
+  assert.equal(ids('proj')[0], 'space:work');
 });
 
 test('fuzzy subsequence as a last resort', () => {
-  assert.ok(ids('gpwr').includes('pin:power'));
+  assert.ok(ids('gspwr').includes('pin:power'));
   assert.deepEqual(ids('zq'), []);
 });
 
@@ -75,10 +75,10 @@ test('accents and case are ignored', () => {
 });
 
 test('marks highlight the matched title text', () => {
-  const [hit] = S.search(entries, 'credit irs');
+  const [hit] = S.search(entries, 'credit lhb');
   assert.equal(hit.entry.id, 'irs');
   const parts = S.chunks(hit.entry.title, hit.marks).filter((c) => c.mark).map((c) => c.text);
-  assert.deepEqual(parts, ['IRS', 'Credit']);
+  assert.deepEqual(parts, ['LHB', 'Credit']);
 });
 
 test('empty query returns nothing', () => {
