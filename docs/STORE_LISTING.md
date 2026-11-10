@@ -18,7 +18,7 @@ Snark turns Chrome's side panel into a calm home for your tabs:
 • **Spaces you swipe between.** Each one is a Chrome tab group with its own colors, icon and gradient. Switching spaces brings back the tab you were on and folds the others away.
 • **Pinned tabs that stay put.** Browse freely inside a pinned tab. Close it, and clicking the pin brings you back to the page you pinned. Rename pins so they keep your label even when the page title changes.
 • **Nested folders.** Organize pins as deep as you like, and drag and drop everything.
-• **Search Snark (⌘⇧K).** A search box centered over the page. Type a few letters to find any pin, folder or tab; Snark opens it and shows you where it lives.
+• **Search Snark (⌘K, or Ctrl+Shift+K on Windows).** A search box centered over the page. Type a few letters to find any pin, folder or tab; Snark opens it and shows you where it lives.
 • **Favorites.** A row of icons for the sites you live in, shared by every space and window.
 • **Today.** Each space keeps its unpinned tabs below the line. New tabs join the space you're in.
 • **Auto-clear and Archive.** Tabs you haven't touched in a day close on their own, and archived pins and folders empty after a timer you choose. Everything goes to the Archive first, so you can restore it.
@@ -29,7 +29,7 @@ Snark turns Chrome's side panel into a calm home for your tabs:
 Private by design: no account, no analytics, no servers. Everything is stored in your browser, or in a folder you choose.
 
 ## Single purpose (dashboard field)
-Organize and switch between tabs in Chrome's side panel: spaces (tab groups), pinned tabs, folders and favorites, plus related tab housekeeping (auto-clear, archive, copy URL).
+Organize and switch between tabs in Chrome's side panel: spaces (tab groups), pinned tabs, folders and favorites, plus finding them again (search) and related tab housekeeping (auto-clear, archive, copy URL).
 
 ## Permission justifications
 | Permission | Why |
