@@ -10,6 +10,15 @@ const modules = [copyUrl, groupPins, autoClear, agentHost];
 // Toolbar button opens the sidebar directly (settings live inside it).
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(console.warn);
 
+// An unpacked (development) copy wears a DEV badge, so it's never mistaken for the store copy.
+chrome.management.getSelf().then((me) => {
+  if (me.installType !== 'development') return;
+  chrome.action.setBadgeText({ text: 'DEV' });
+  chrome.action.setBadgeBackgroundColor({ color: '#e8710a' });
+  chrome.action.setBadgeTextColor?.({ color: '#ffffff' });
+  chrome.action.setTitle({ title: 'Open Snark (dev copy)' });
+}).catch(() => {});
+
 // ⌘B / Ctrl+B toggles the sidebar. Each open sidebar keeps a port to us (and pings it, which keeps
 // this worker awake), so we know synchronously whether to open or close, and side-panel open()
 // must be called right away, inside the shortcut's user gesture.

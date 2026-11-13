@@ -5,6 +5,7 @@
 //   dist/snark-<version>/      the same files unzipped ("Load unpacked" it once as a smoke test)
 //
 // - Only runtime files are included (no tests, docs, tools, package.json, feature template).
+// - The manifest's name loses its " (dev)" suffix, so the store copy is plain "Snark".
 // - The manifest's "key" is removed: the store rejects it on first upload and assigns its own ID.
 //   (The repo keeps the key so unpacked dev installs have a stable ID.)
 // - Every file referenced by the manifest, HTML (<script>/<link>) and JS imports must exist,
@@ -45,9 +46,10 @@ for (const d of INCLUDE_DIRS) {
   }
 }
 
-// ---- manifest: strip key
+// ---- manifest: strip key, and drop the " (dev)" the repo's copy carries
 const manifest = JSON.parse(files.get('manifest.json').toString('utf8'));
 delete manifest.key;
+manifest.name = manifest.name.replace(/\s*\(dev\)\s*$/i, '');
 files.set('manifest.json', Buffer.from(JSON.stringify(manifest, null, 2) + '\n'));
 const { name, version } = manifest;
 

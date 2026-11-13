@@ -138,9 +138,11 @@ Private by design: no account, no analytics, no servers. See [PRIVACY.md](PRIVAC
 
 ## Development
 
+The repo's copy is named **Snark (dev)** and, when loaded unpacked, wears an orange **DEV** badge on its toolbar icon, so it's easy to tell apart from the store copy. Develop in its own Chrome profile: two copies in one profile would both manage your tab groups and want the same shortcuts. `npm run package` builds the store zip as plain "Snark".
+
 ```
 npm test           # unit tests (Node 20+)
-npm run package    # dist/snark-<version>.zip for the Chrome Web Store (strips "key", checks references)
+npm run package    # dist/snark-<version>.zip for the Chrome Web Store (strips "key" and " (dev)", checks references)
 npm run icons      # regenerate icons/ from tools/make-icons.py (Pillow + numpy)
 ```
 
