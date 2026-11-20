@@ -18,6 +18,12 @@ Private by design: no account, no analytics, no servers. See [PRIVACY.md](PRIVAC
 
 **Moving the folder:** the manifest's `key` gives Snark a fixed ID (`ehphddjhccoiekiolhdhjcngcilbhijl`). But **removing an extension in Chrome deletes its data**, so before moving or re-adding the folder, export a backup: **⚙ → Backup → Export**. Then click **Load unpacked** and choose the new folder; with the same ID, Chrome should update the existing install. If Chrome adds a second copy instead, remove the old one, then use **Import** and choose your agent folder again. Export and Import are also how you move to another computer or Chrome profile.
 
+### Optional sample backup
+
+Download [the sample backup](examples/snark-sample-backup.json) and choose **Settings → Backup → Import** in Snark. It contains three spaces with two folders each and 12 pins to public websites.
+
+Import replaces the current profile's saved Snark data. Use a separate Chrome profile for the sample, or export your current backup first.
+
 ## The sidebar
 
 ```
