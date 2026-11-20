@@ -1,0 +1,157 @@
+{
+  "app": "Snark",
+  "version": "1.4.2",
+  "local": {
+    "tree": [
+      {
+        "id": "work",
+        "type": "folder",
+        "parent": null,
+        "title": "Work",
+        "icon": "💼",
+        "color": "blue",
+        "theme": "sky"
+      },
+      {
+        "id": "open-source",
+        "type": "folder",
+        "parent": "work",
+        "title": "Open source"
+      },
+      {
+        "id": "github",
+        "type": "pin",
+        "parent": "open-source",
+        "title": "GitHub",
+        "url": "https://github.com/"
+      },
+      {
+        "id": "github-trending",
+        "type": "pin",
+        "parent": "open-source",
+        "title": "GitHub Trending",
+        "url": "https://github.com/trending"
+      },
+      {
+        "id": "developer-reference",
+        "type": "folder",
+        "parent": "work",
+        "title": "Developer reference"
+      },
+      {
+        "id": "mdn",
+        "type": "pin",
+        "parent": "developer-reference",
+        "title": "MDN Web Docs",
+        "url": "https://developer.mozilla.org/en-US/"
+      },
+      {
+        "id": "stackoverflow",
+        "type": "pin",
+        "parent": "developer-reference",
+        "title": "Stack Overflow",
+        "url": "https://stackoverflow.com/questions"
+      },
+      {
+        "id": "home",
+        "type": "folder",
+        "parent": null,
+        "title": "Home",
+        "icon": "🏠",
+        "color": "green",
+        "theme": "mint"
+      },
+      {
+        "id": "weeknight-cooking",
+        "type": "folder",
+        "parent": "home",
+        "title": "Weeknight cooking"
+      },
+      {
+        "id": "allrecipes",
+        "type": "pin",
+        "parent": "weeknight-cooking",
+        "title": "Allrecipes",
+        "url": "https://www.allrecipes.com/"
+      },
+      {
+        "id": "budget-bytes",
+        "type": "pin",
+        "parent": "weeknight-cooking",
+        "title": "Budget Bytes",
+        "url": "https://www.budgetbytes.com/"
+      },
+      {
+        "id": "home-projects",
+        "type": "folder",
+        "parent": "home",
+        "title": "Home projects"
+      },
+      {
+        "id": "ikea",
+        "type": "pin",
+        "parent": "home-projects",
+        "title": "IKEA",
+        "url": "https://www.ikea.com/us/en/"
+      },
+      {
+        "id": "this-old-house",
+        "type": "pin",
+        "parent": "home-projects",
+        "title": "This Old House",
+        "url": "https://www.thisoldhouse.com/"
+      },
+      {
+        "id": "explore",
+        "type": "folder",
+        "parent": null,
+        "title": "Explore",
+        "icon": "📚",
+        "color": "purple",
+        "theme": "lilac"
+      },
+      {
+        "id": "curiosity",
+        "type": "folder",
+        "parent": "explore",
+        "title": "Curiosity rabbit holes"
+      },
+      {
+        "id": "wikipedia",
+        "type": "pin",
+        "parent": "curiosity",
+        "title": "Wikipedia",
+        "url": "https://www.wikipedia.org/"
+      },
+      {
+        "id": "nasa",
+        "type": "pin",
+        "parent": "curiosity",
+        "title": "NASA",
+        "url": "https://www.nasa.gov/"
+      },
+      {
+        "id": "watch",
+        "type": "folder",
+        "parent": "explore",
+        "title": "Watch and learn"
+      },
+      {
+        "id": "youtube",
+        "type": "pin",
+        "parent": "watch",
+        "title": "YouTube",
+        "url": "https://www.youtube.com/"
+      },
+      {
+        "id": "ted",
+        "type": "pin",
+        "parent": "watch",
+        "title": "TED Talks",
+        "url": "https://www.ted.com/talks"
+      }
+    ],
+    "favorites": []
+  },
+  "sync": {}
+}
