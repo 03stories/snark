@@ -33,7 +33,7 @@ Import replaces the current profile's saved Snark data. Use a separate Chrome pr
    Team dashboard              ← pinned tab (open, or greyed out when closed)
    ▾ Repos                     ← folder (nest as deep as you like)
       Open PRs
-      ↳ Release checklist      ← ↳ = you navigated away; hover to see the pinned URL
+      Releases › Review queue  ← saved pin › current page
  ─────────────── ↓ Clear
  ＋ New Tab
    Weekly notes                ← Today: this space's unpinned tabs
@@ -73,6 +73,7 @@ Import replaces the current profile's saved Snark data. Use a separate Chrome pr
 
 ### Pinned tabs
 - **Pinned URL never changes when you browse.** You can navigate freely inside a pinned tab. When you close it (with **—**, ⌘W, or anything else), the pin stays, and clicking it again reopens the original pinned URL.
+- **After you browse away, the row shows the saved pin › current page.** Click the saved pin’s favicon or label to return to its pinned URL. Click the current page title to switch to the tab where you left it.
 - **Right-click a pin, or use its ⋯ button, to:**
   - **Duplicate**, **Open in Split** (side by side with your current tab, Chrome 155+), or **Open in Window**. Each makes a copy and leaves the pin as it is.
   - Rename it (the label stays even when the page title changes)
@@ -82,7 +83,7 @@ Import replaces the current profile's saved Snark data. Use a separate Chrome pr
   - Move it to another space
   - Close the tab but keep the pin
   - Unpin
-- Double-click any name to rename it.
+- Double-click a saved name to rename it. When a pin shows two titles, use **⋯ → Rename…**.
 - Pinned tabs sit at the top of their Chrome tab group, in sidebar order. You can turn this off in settings.
 
 ### Folders and drag and drop

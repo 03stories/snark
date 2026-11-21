@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.3
+
+- When you browse away from a saved tab’s pinned URL, its row shows the saved pin followed by the current page. Click the saved pin to go back.
+
 ## 1.4.2
 
 - **A simpler bottom bar:** 🗄 Archive on the left, your spaces centered, ＋ on the right.

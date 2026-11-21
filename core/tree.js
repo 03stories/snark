@@ -291,16 +291,17 @@ export async function updateNode(id, patch) {
   await mutate((t) => t.map((n) => (n.id === id ? { ...n, ...patch } : n)));
 }
 
-export async function openPin(pinId, { windowId, active = true, pinsAtTop = true } = {}) {
+export async function openPin(pinId, { windowId, active = true, pinsAtTop = true, usePinnedUrl = false } = {}) {
   const tree = await getTree();
   const pin = byId(tree, pinId);
   if (!pin) return;
   const t = await liveTab(pinId);
   if (t) {
-    if (active) {
-      await chrome.tabs.update(t.id, { active: true });
-      await chrome.windows.update(t.windowId, { focused: true });
-    }
+    const update = {};
+    if (usePinnedUrl && (t.pendingUrl || t.url) !== pin.url) update.url = pin.url;
+    if (active) update.active = true;
+    if (Object.keys(update).length) await chrome.tabs.update(t.id, update);
+    if (active) await chrome.windows.update(t.windowId, { focused: true });
     return t;
   }
   const root = rootOf(tree, pinId);

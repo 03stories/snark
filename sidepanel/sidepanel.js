@@ -327,15 +327,21 @@ function pinHtml(p, depth) {
   const open = !!tab;
   const drifted = open && tab.url && tab.url !== p.url;
   const active = open && tab.active && tab.windowId === windowId;
-  // Shown as a hover label after a short delay: the pinned URL, plus where you are now if you've navigated away.
-  const sub = drifted
-    ? `${esc(shortUrl(p.url))}<span class="now">↳ now: ${esc(tab.title || shortUrl(tab.url))}</span>`
-    : esc(shortUrl(p.url));
+  const currentTitle = drifted ? esc(tab.title || shortUrl(tab.url)) : '';
+  const savedLabel = `${icoImg(p.url, tab)}<span>${esc(p.title)}</span>`;
   const noteHtml = p.note ? `<span class="note">${esc(p.note)}</span>` : '';
   return `<div class="row pin ${open ? 'open' : 'closed'}${drifted ? ' drifted' : ''}${active ? ' active' : ''}"
        data-kind="pin" data-id="${p.id}" draggable="true" style="--d:${depth}">
-    ${icoImg(p.url, tab)}
-    <div class="text"><div class="title">${esc(p.title)}</div><div class="sub">${sub}${noteHtml}</div></div>
+    <div class="pin-path">
+      <span class="title pin-label">
+        ${drifted
+          ? `<button type="button" class="pin-saved" data-act="open-pinned-url" title="Go to pinned URL · ${esc(p.title)}&#10;${esc(shortUrl(p.url))}" aria-label="Go to pinned URL for ${esc(p.title)}">${savedLabel}</button>`
+          : `<span class="pin-saved">${savedLabel}</span>`}
+      </span>
+      ${drifted ? `<span class="pin-divider" aria-hidden="true">${CHEV}</span>
+        <button type="button" class="pin-current" title="${currentTitle}">${currentTitle}</button>` : ''}
+    </div>
+    <div class="sub">${esc(shortUrl(p.url))}${noteHtml}</div>
     <span class="acts">
       ${open ? '<button data-act="close-pin" title="Close tab, keep pinned">—</button>' : ''}
       <button data-act="menu" title="More">⋯</button>
@@ -1232,6 +1238,7 @@ document.addEventListener('click', async (e) => {
       case 'import-confirm': await doImport(); return;
       case 'import-cancel': resetImport(); return;
       case 'menu': { const r = actEl.getBoundingClientRect(); showMenu(menuFor(row), r.left, r.bottom + 2); return; }
+      case 'open-pinned-url': if (!editing) await T.openPin(row.dataset.id, { ...opts(), usePinnedUrl: true }); return;
       case 'close-pin': await T.closePin(row.dataset.id); return;
       case 'close-tab': await chrome.tabs.remove(+row.dataset.id); return;
       case 'goto': {
@@ -1302,7 +1309,7 @@ document.addEventListener('click', async (e) => {
 });
 
 document.addEventListener('dblclick', (e) => {
-  const title = e.target.closest('.row .title');
+  const title = e.target.closest('.row:not(.drifted) .title');
   const row = title?.closest('[data-kind]');
   if (row) renameRow(row);
 });
