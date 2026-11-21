@@ -334,7 +334,7 @@ function pinHtml(p, depth) {
   const noteHtml = p.note ? `<span class="note">${esc(p.note)}</span>` : '';
   return `<div class="row pin ${open ? 'open' : 'closed'}${drifted ? ' drifted' : ''}${active ? ' active' : ''}"
        data-kind="pin" data-id="${p.id}" draggable="true" style="--d:${depth}">
-    ${icoImg(p.url, tab)}
+    <button type="button" class="pin-favicon" data-act="open-pinned-url" title="Go to pinned URL" aria-label="Go to pinned URL for ${esc(p.title)}">${icoImg(p.url, tab)}</button>
     <div class="text"><div class="title">${esc(p.title)}</div><div class="sub">${sub}${noteHtml}</div></div>
     <span class="acts">
       ${open ? '<button data-act="close-pin" title="Close tab, keep pinned">—</button>' : ''}
@@ -1232,6 +1232,7 @@ document.addEventListener('click', async (e) => {
       case 'import-confirm': await doImport(); return;
       case 'import-cancel': resetImport(); return;
       case 'menu': { const r = actEl.getBoundingClientRect(); showMenu(menuFor(row), r.left, r.bottom + 2); return; }
+      case 'open-pinned-url': if (!editing) await T.openPin(row.dataset.id, { ...opts(), usePinnedUrl: true }); return;
       case 'close-pin': await T.closePin(row.dataset.id); return;
       case 'close-tab': await chrome.tabs.remove(+row.dataset.id); return;
       case 'goto': {

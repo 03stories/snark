@@ -90,6 +90,12 @@ button:hover { background: var(--hover); }
 }
 .row:hover { background: var(--hover); }
 .row .ico { width: 16px; height: 16px; flex: none; border-radius: 3px; }
+.pin-favicon {
+  width: 24px; height: 24px; flex: none; display: grid; place-items: center;
+  margin: 0 -4px; padding: 0; border-radius: 5px; cursor: pointer;
+}
+.pin-favicon:hover { background: rgba(127,127,127,.18); }
+.pin-favicon:focus-visible { outline: 2px solid var(--accent); outline-offset: -1px; }
 .row .text { flex: 1; min-width: 0; }
 .row .title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* The URL line is a floating label that appears after resting on a row, so lists stay clean and nothing shifts. */
@@ -100,7 +106,7 @@ button:hover { background: var(--hover); }
   font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   opacity: 0; visibility: hidden; transition: opacity .1s, visibility 0s linear .1s;
 }
-.row:hover .sub { opacity: 1; visibility: visible; transition-delay: .6s, .6s; }
+.row:hover:not(:has(.pin-favicon:hover)) .sub { opacity: 1; visibility: visible; transition-delay: .6s, .6s; }
 .row .sub .now { display: block; color: var(--accent); overflow: hidden; text-overflow: ellipsis; }
 .dragging .sub, body.dragging-any .sub { visibility: hidden !important; }
 .row.editing .sub {

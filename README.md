@@ -73,6 +73,7 @@ Import replaces the current profile's saved Snark data. Use a separate Chrome pr
 
 ### Pinned tabs
 - **Pinned URL never changes when you browse.** You can navigate freely inside a pinned tab. When you close it (with **—**, ⌘W, or anything else), the pin stays, and clicking it again reopens the original pinned URL.
+- **Click the favicon to go to the pinned URL.** Clicking the title of an open pin switches to the page you were browsing.
 - **Right-click a pin, or use its ⋯ button, to:**
   - **Duplicate**, **Open in Split** (side by side with your current tab, Chrome 155+), or **Open in Window**. Each makes a copy and leaves the pin as it is.
   - Rename it (the label stays even when the page title changes)

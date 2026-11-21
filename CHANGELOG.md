@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.3
+
+- Click a saved tab’s favicon to go straight to its pinned URL.
+
 ## 1.4.2
 
 - **A simpler bottom bar:** 🗄 Archive on the left, your spaces centered, ＋ on the right.
