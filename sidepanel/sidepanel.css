@@ -90,12 +90,29 @@ button:hover { background: var(--hover); }
 }
 .row:hover { background: var(--hover); }
 .row .ico { width: 16px; height: 16px; flex: none; border-radius: 3px; }
-.pin-favicon {
-  width: 24px; height: 24px; flex: none; display: grid; place-items: center;
-  margin: 0 -4px; padding: 0; border-radius: 5px; cursor: pointer;
+.pin-path {
+  display: flex; align-items: center; gap: 5px; flex: 1; min-width: 0; margin-left: -4px;
 }
-.pin-favicon:hover { background: rgba(127,127,127,.18); }
-.pin-favicon:focus-visible { outline: 2px solid var(--accent); outline-offset: -1px; }
+.pin-label { min-width: 0; }
+.pin.drifted .pin-label { max-width: 44%; }
+.pin-saved {
+  display: flex; align-items: center; gap: 8px; max-width: 100%; height: 24px;
+  padding: 0 5px 0 4px; border-radius: 5px;
+}
+.pin-saved span, .pin-current { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+button.pin-saved { color: color-mix(in srgb, var(--fg) 20%, var(--muted)); }
+button.pin-saved .ico { opacity: .6; }
+button.pin-saved:is(:hover, :focus-visible) { color: var(--fg); }
+button.pin-saved:is(:hover, :focus-visible) .ico { opacity: 1; }
+button.pin-saved:is(:hover, :focus-visible), .pin-current:hover { background: rgba(127, 127, 127, .16); }
+button.pin-saved:focus-visible, .pin-current:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.pin-divider { flex: none; display: grid; place-items: center; }
+.pin-divider .chev { transform: rotate(-90deg); }
+.pin-current {
+  flex: 1; min-width: 0; height: 24px; padding: 0 4px; text-align: left; border-radius: 5px;
+}
+.pin.editing .pin-label:has(.rename), .pin.editing .sub:has(.rename) { flex: 1; min-width: 0; max-width: none; }
+.pin.editing :is(.pin-divider, .pin-current), .pin.editing .sub:not(:has(.rename)) { display: none; }
 .row .text { flex: 1; min-width: 0; }
 .row .title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* The URL line is a floating label that appears after resting on a row, so lists stay clean and nothing shifts. */
@@ -106,14 +123,13 @@ button:hover { background: var(--hover); }
   font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   opacity: 0; visibility: hidden; transition: opacity .1s, visibility 0s linear .1s;
 }
-.row:hover:not(:has(.pin-favicon:hover)) .sub { opacity: 1; visibility: visible; transition-delay: .6s, .6s; }
+.row:hover:not(:has(button.pin-saved:hover, .pin-current:hover)) .sub { opacity: 1; visibility: visible; transition-delay: .6s, .6s; }
 .row .sub .now { display: block; color: var(--accent); overflow: hidden; text-overflow: ellipsis; }
 .dragging .sub, body.dragging-any .sub { visibility: hidden !important; }
 .row.editing .sub {
   position: static; opacity: 1; visibility: visible; transition: none;
   padding: 0; background: none; box-shadow: none; max-width: none; pointer-events: auto;
 }
-.pin.drifted .title::before { content: '↳ '; color: var(--accent); }
 .row .count { font-size: 11px; color: var(--muted); }
 .row .acts { display: none; gap: 1px; margin-left: auto; }
 .row:hover .acts { display: flex; }

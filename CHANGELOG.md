@@ -2,7 +2,7 @@
 
 ## 1.4.3
 
-- Click a saved tab’s favicon to go straight to its pinned URL.
+- When you browse away from a saved tab’s pinned URL, its row shows the saved pin followed by the current page. Click the saved pin to go back.
 
 ## 1.4.2
 
