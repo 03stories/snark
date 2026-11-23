@@ -21,6 +21,10 @@ jobs:
         run: for f in $(git ls-files '*.js' '*.mjs'); do node --check "$f"; done
       - name: Tests
         run: npm test
+      - name: Prepare release notes from CHANGELOG.md
+        env:
+          RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+        run: node tools/release-notes.mjs "$RELEASE_TAG" > "$RUNNER_TEMP/snark-release-notes.md"
       - name: Package (strips manifest key, validates references)
         run: npm run package
       - uses: actions/upload-artifact@v4
@@ -29,6 +33,8 @@ jobs:
           path: dist/*.zip
       - name: Attach zip to release
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
+          body_path: ${{ runner.temp }}/snark-release-notes.md
           files: dist/*.zip
+          fail_on_unmatched_files: true
