@@ -10,8 +10,8 @@ Snark is a Manifest V3 Chrome extension for spaces, pinned tabs, nested folders,
 ## Release versioning
 
 - Use a patch bump for user-facing fixes and small refinements. Use a minor bump for substantial new features or workflow changes. Keep the current version for documentation and sample-data changes.
-- Set the release version in `manifest.json` and add the matching entry to `CHANGELOG.md` in the release pull request. Regular CI builds use the version already in the manifest.
-- CI uploads the ZIP as a workflow artifact for pull requests and pushes to `main`. For a deliberate GitHub Release, tag the merged release commit `v<version>` using the manifest version. The tag build attaches the ZIP to the GitHub Release. Chrome Web Store submission is a separate step.
+- Set the release version in `manifest.json` and add a matching `## <version>` section to `CHANGELOG.md` in the release pull request. A short title after the version is optional. Write concise, user-facing bullets in order of impact. Describe what people will notice and include any steps they need to take. These bullets can also be adapted for the Chrome Web Store listing description.
+- CI checks the changelog entry for the manifest version and uploads the ZIP as a workflow artifact for pull requests and pushes to `main`. For a deliberate GitHub Release, tag the merged release commit `v<version>` using the manifest version. The tag build uses that changelog section for the release notes and attaches the ZIP. Chrome Web Store listing edits and submissions are separate steps.
 
 ## Development and checks
 
