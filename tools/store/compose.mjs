@@ -168,16 +168,15 @@ const A3 = `<section class="ab a3" id="a3" style="width:1280px;height:800px">
   <div class="copy">
     ${brand}
     ${H('Pinned tabs that actually stay pinned.')}
-    <p class="lede">Wander off all you like. One click takes you back to where you meant to be.</p>
+    <p class="lede">See the page you saved and the page you’re on. Click the saved pin to go back.</p>
     <ul class="points">
       <li><b>Close the tab,</b> keep the pin.</li>
       <li><b>Liked where you ended up?</b> Make it the new pinned URL.</li>
       <li><b>Open in Split</b> or a new window from any pin.</li>
     </ul>
   </div>
-  <div class="stage" style="left:500px;top:52px">${browser({ w: 740, h: 696, url: 'https://news.tidyweb.dev/competitor-pricing', active: 'Pricing page draft', page: PAGE_PRICING, side: 'drift' })}</div>
-  <div class="callout" data-anchor='.row[data-id="pricing"]' data-side="left" data-bend="-1" style="--dx:-215px;--dy:178px">↳ you wandered.</div>
-  <div class="callout" data-anchor='#menu .item:nth-of-type(7)' data-side="left" data-bend="1" style="--dx:-340px;--dy:50px">one click, and you’re back.</div>
+  <div class="stage" style="left:500px;top:52px">${browser({ w: 740, h: 696, url: 'https://news.tidyweb.dev/competitor-pricing', active: 'Competitor pricing', page: PAGE_PRICING, side: 'drift', sideW: 352 })}</div>
+  <div class="callout" data-anchor='.row[data-id="pricing"] .pin-saved' data-side="left" data-bend="-1" style="--dx:-288px;--dy:188px">back to the saved page.</div>
 </section>`;
 
 const A4 = `<section class="ab a4" id="a4" style="width:1280px;height:800px">
@@ -263,7 +262,9 @@ const ARTBOARDS = [
 
 // ---------------------------------------------------------------- page
 const CSS = read('tools/store/graphics.css');
-const html = `<title>Snark Store Graphics</title>
+const html = `<!doctype html>
+<meta charset="utf-8">
+<title>Snark Store Graphics</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 ${CSS}
