@@ -19,7 +19,7 @@ The best part of a browser that was promised to be free forever, now for the one
 Snark turns Chrome's side panel into a calm home for your tabs:
 
 • Spaces you swipe between. Each one is a Chrome tab group with its own colors, icon and gradient. Switching spaces brings back the tab you were on and folds the others away.
-• Pinned tabs that stay put. Browse freely inside a pinned tab. Close it, and clicking the pin brings you back to the page you pinned. Rename pins so they keep your label even when the page title changes.
+• Pinned tabs that stay put. Browse freely and see the saved pin beside your current page. Click the saved pin to go back, or reopen it later if you’ve closed the tab. Rename pins to give them labels that stay put as you browse.
 • Nested folders. Organize pins as deep as you like, and drag and drop everything.
 • Search Snark (⌘K, or Ctrl+Shift+K on Windows). A search box centered over the page. Type a few letters to find any pin, folder or tab; Snark opens it and shows you where it lives.
 • Favorites. A row of icons for the sites you live in, shared by every space and window.
@@ -75,7 +75,7 @@ Upload in this order. They're built from Snark's real sidebar and search UI with
 |---|---|---|
 | `screenshot-1-overview.png` | Screenshot 1 (1280×800) | "Your tabs, bookmarked, in spaces." The sidebar you miss, in the browser you already use. |
 | `screenshot-2-spaces.png` | Screenshot 2 | "Swipe between spaces. Feel organized." Each space is a real tab group. |
-| `screenshot-3-pinned.png` | Screenshot 3 | "Pinned tabs that actually stay pinned." Wander off; one click back. |
+| `screenshot-3-pinned.png` | Screenshot 3 | "Pinned tabs that actually stay pinned." The saved pin sits beside the current page. |
 | `screenshot-4-search.png` | Screenshot 4 | "⌘K. Because you have 214 tabs." Search that shows you where you put it. |
 | `screenshot-5-agent.png` | Screenshot 5 | "Hand the mess to your AI." The agent folder, as a three-step story. |
 | `promo-440x280.png` | Small promo tile | Snark · "Tabs, tamed. Mostly." |

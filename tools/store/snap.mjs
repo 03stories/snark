@@ -94,7 +94,8 @@ switch (scenario) {
   case 'side': activate(30); showGroup(102); break;
   case 'drift': {
     const t = tabs.find((x) => x.id === 11);
-    Object.assign(t, { url: 'https://news.tidyweb.dev/competitor-pricing', title: 'Competitor pricing, compared' });
+    tree.find((node) => node.id === 'pricing').title = 'Pricing draft';
+    Object.assign(t, { url: 'https://news.tidyweb.dev/competitor-pricing', title: 'Competitor pricing' });
     activate(11);
     break;
   }
@@ -123,17 +124,6 @@ const $ = (s) => document.querySelector(s);
 await wait(400);
 
 // ---------------------------------------------------------------- scenario actions
-if (scenario === 'drift') {
-  const row = $('.page[data-space="work"] .row.pin[data-id="pricing"]');
-  row.classList.add('force-sub');
-  row.dispatchEvent(new w.MouseEvent('contextmenu', { bubbles: true, clientX: 0, clientY: 0 }));
-  await wait(50);
-  // A graphic needs the interesting half of the menu, not every "Move to…".
-  const items = [...document.querySelectorAll('#menu > *')];
-  const cut = items.findIndex((el) => el.textContent === 'Add to Favorites');
-  items.slice(cut).forEach((el) => el.remove());
-  document.querySelector('#menu > hr:last-child')?.remove();
-}
 if (scenario === 'found') {
   port.onMessage.fire({ type: 'reveal', entry: { kind: 'pin', id: 'launchchk' }, open: true });
   await wait(700);
